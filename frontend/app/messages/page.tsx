@@ -177,7 +177,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex overflow-hidden" style={{ height: "calc(100vh - 60px)" }}>
+    <div style={{ position: "fixed", top: 60, left: 0, right: 0, bottom: 0, display: "flex", overflow: "hidden" }}>
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
       <div className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-r border-cream-dark bg-white">
