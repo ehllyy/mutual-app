@@ -29,11 +29,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${playfair.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${playfair.variable} antialiased`}
     >
-      <body className="overflow-hidden h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="overflow-hidden flex-1">{children}</main>
+        <main className="flex-1">{children}</main>
       </body>
     </html>
   );
