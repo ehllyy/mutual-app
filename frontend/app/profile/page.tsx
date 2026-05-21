@@ -96,14 +96,11 @@ function SectionHeader({
 
 /* ─── static data ────────────────────────────────────────────────── */
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
 const DEFAULT_BIO =
   "I'm a UI/UX designer based in East Legon, Accra. I've been working in product design for 3 years — mostly on mobile apps and SaaS dashboards. Outside of work I play acoustic guitar and I'm learning West African cooking. I love meeting neighbours through Mutual because every swap teaches me something new. Happy to do sessions online or in person locally.";
 
 const DEFAULT_OFFER = ["Design", "React", "B2 German"];
 const DEFAULT_NEED = ["Furniture repair", "French lessons", "Cooking lessons"];
-const DEFAULT_AVAIL = [false, false, true, false, true, true, true];
 
 /* ─── page ───────────────────────────────────────────────────────── */
 
@@ -124,9 +121,6 @@ export default function ProfilePage() {
   const [editingNeed, setEditingNeed] = useState(false);
   const [needDraft, setNeedDraft] = useState([...DEFAULT_NEED]);
   const [needInput, setNeedInput] = useState("");
-
-  /* availability */
-  const [avail, setAvail] = useState(DEFAULT_AVAIL);
 
   /* ─ about handlers ─ */
   function startBioEdit() {
@@ -218,10 +212,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <button className="mt-1 flex items-center gap-1.5 rounded-xl border border-cream-dark px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-ink-muted hover:text-ink">
-                <Pencil className="h-3.5 w-3.5" />
-                Edit profile
-              </button>
             </div>
           </div>
         </div>
@@ -334,37 +324,6 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* ── AVAILABILITY ──────────────────────────────────── */}
-        <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-            Availability
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {DAYS.map((day, i) => (
-              <button
-                key={day}
-                onClick={() =>
-                  setAvail((prev) => {
-                    const next = [...prev];
-                    next[i] = !next[i];
-                    return next;
-                  })
-                }
-                className={`flex h-12 w-12 flex-col items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-                  avail[i]
-                    ? "bg-sage text-white"
-                    : "bg-cream-dark text-ink-muted hover:bg-sage/20"
-                }`}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
-          <p className="mt-3 text-xs text-ink-muted">
-            Tap a day to toggle your availability.
-          </p>
         </div>
 
       </div>

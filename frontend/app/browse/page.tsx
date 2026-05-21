@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Search, MapPin, ArrowRight, X, Send } from "lucide-react";
+import { isLoggedIn } from "@/lib/auth";
+import AuthPromptModal from "@/components/AuthPromptModal";
 
 const CATEGORIES = [
   "All Skills",
@@ -150,6 +152,7 @@ export default function BrowsePage() {
   const [proposalSkill, setProposalSkill] = useState("");
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
+  const [authPrompt, setAuthPrompt] = useState(false);
 
   const filtered = LISTINGS.filter((s) => {
     const matchCat =
@@ -164,6 +167,10 @@ export default function BrowsePage() {
   });
 
   function openModal(listing: SkillListing) {
+    if (!isLoggedIn()) {
+      setAuthPrompt(true);
+      return;
+    }
     setProposalTarget(listing);
     setProposalSent(false);
     setProposalSkill("");
@@ -202,10 +209,10 @@ export default function BrowsePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by skills, e.g. hairdressing or piano lessons...."
-              className="w-full rounded-full border border-cream-dark bg-white py-3 pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
+              className="w-full rounded-[12px] border border-cream-dark bg-white py-3 pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
             />
           </div>
-          <button className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft">
+          <button className="rounded-[12px] bg-ink px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft">
             Search
           </button>
         </div>
@@ -231,9 +238,13 @@ export default function BrowsePage() {
       {/* Card grid */}
       <div className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
         {filtered.length === 0 ? (
-          <p className="py-20 text-center text-ink-muted">
-            No skills match your search. Try a different term or category.
-          </p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cream-dark">
+              <Search className="h-6 w-6 text-ink-muted" />
+            </div>
+            <h3 className="text-base font-semibold text-ink">No skills found</h3>
+            <p className="mt-1.5 text-sm text-ink-muted">Try a different search or category</p>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((listing) => {
@@ -244,10 +255,11 @@ export default function BrowsePage() {
               return (
                 <div
                   key={listing.id}
-                  className="flex flex-col rounded-2xl border border-cream-dark bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+                  className="flex flex-col overflow-hidden rounded-[12px] shadow-sm transition-shadow hover:shadow-md"
+                  style={{ border: "1.5px solid #EDE9DA" }}
                 >
-                  {/* User header */}
-                  <div className="flex items-center gap-3">
+                  {/* TOP — white */}
+                  <div className="flex items-center gap-3 bg-white px-4 pb-3 pt-4">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                       style={{ backgroundColor: listing.avatarColor }}
@@ -265,28 +277,34 @@ export default function BrowsePage() {
                     </div>
                   </div>
 
-                  {/* Offers / Needs */}
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="mt-0.5 shrink-0 rounded-full border border-sage px-2 py-0.5 text-[10px] font-bold tracking-wide text-sage">
+                  {/* MIDDLE — cream wraps both rows */}
+                  <div style={{ backgroundColor: "#F5F1E6" }}>
+                    <div
+                      className="flex h-[46px] items-center gap-2 bg-white px-4"
+                      style={{ borderTop: "1px dashed #EAF0EB" }}
+                    >
+                      <span className="shrink-0 rounded-full border border-sage px-2 py-0.5 text-[10px] font-bold tracking-wide text-sage">
                         OFFERS
                       </span>
-                      <span className="text-sm leading-snug text-ink-soft">
+                      <span className="truncate text-sm text-ink-soft">
                         {listing.offers}
                       </span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span className="mt-0.5 shrink-0 rounded-full border border-amber-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-600">
+                    <div
+                      className="flex h-[46px] items-center gap-2 bg-white px-4"
+                      style={{ borderBottom: "1px dashed #EAF0EB" }}
+                    >
+                      <span className="shrink-0 rounded-full border border-amber-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-600">
                         NEEDS
                       </span>
-                      <span className="text-sm leading-snug text-ink-soft">
+                      <span className="truncate text-sm text-ink-soft">
                         {listing.needs}
                       </span>
                     </div>
                   </div>
 
-                  {/* Category tag */}
-                  <div className="mt-3">
+                  {/* BOTTOM — white */}
+                  <div className="bg-white px-4 pb-4 pt-3">
                     <span
                       className="rounded-full px-2.5 py-1 text-xs font-medium"
                       style={{
@@ -296,27 +314,34 @@ export default function BrowsePage() {
                     >
                       {listing.category}
                     </span>
-                  </div>
 
-                  <p className="mt-2 text-xs text-ink-muted">
-                    {listing.availability}
-                  </p>
-
-                  {/* Actions */}
-                  <div className="mt-4 flex items-center gap-4 pt-1">
-                    <button
-                      onClick={() => openModal(listing)}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
-                    >
-                      Propose a swap
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                    <Link
-                      href={`/users/${listing.id}`}
-                      className="text-sm font-medium text-ink-soft transition-colors hover:text-ink"
-                    >
-                      View profile
-                    </Link>
+                    <div className="mt-3 flex items-center gap-2">
+                      <button
+                        onClick={() => openModal(listing)}
+                        className="flex flex-1 items-center justify-center gap-1.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                        style={{
+                          backgroundColor: "#1C1A14",
+                          borderRadius: "8px",
+                          height: "38px",
+                        }}
+                      >
+                        Propose a swap
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                      <Link
+                        href={`/users/${listing.id}`}
+                        className="flex shrink-0 items-center justify-center text-sm font-medium text-ink-soft transition-colors hover:text-ink"
+                        style={{
+                          width: "106px",
+                          height: "38px",
+                          backgroundColor: "white",
+                          border: "1px solid #EAF0EB",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        View profile
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );
@@ -332,7 +357,8 @@ export default function BrowsePage() {
           onClick={closeModal}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-cream p-6 shadow-2xl"
+            className="w-full max-w-[560px] bg-white p-6 shadow-2xl"
+            style={{ borderRadius: 16 }}
             onClick={(e) => e.stopPropagation()}
           >
             {proposalSent ? (
@@ -341,13 +367,13 @@ export default function BrowsePage() {
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sage-light">
                   <Send className="h-5 w-5 text-sage" />
                 </div>
-                <h3 className="text-lg font-bold text-ink">Proposal sent!</h3>
+                <h3 className="font-display text-xl font-bold text-ink">Proposal sent!</h3>
                 <p className="mt-1.5 text-sm text-ink-muted">
                   {proposalTarget.name} will be notified of your swap proposal.
                 </p>
                 <button
                   onClick={closeModal}
-                  className="mt-6 w-full rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+                  className="mt-6 w-full rounded-xl bg-ink py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-soft"
                 >
                   Back to Browse
                 </button>
@@ -355,12 +381,13 @@ export default function BrowsePage() {
             ) : (
               /* Form state */
               <>
+                {/* Header */}
                 <div className="mb-5 flex items-start justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-ink">
-                      Propose a swap
+                    <h3 className="font-display text-2xl font-bold text-ink">
+                      Propose a Swap
                     </h3>
-                    <p className="mt-0.5 text-sm text-ink-muted">
+                    <p className="mt-0.5 text-sm" style={{ color: "#8A887E" }}>
                       with {proposalTarget.name}
                     </p>
                   </div>
@@ -372,58 +399,95 @@ export default function BrowsePage() {
                   </button>
                 </div>
 
-                {/* What they offer, so you know context */}
-                <div className="mb-5 rounded-xl border border-cream-dark bg-white p-3 text-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                    They offer
-                  </p>
-                  <p className="mt-1 text-ink-soft">{proposalTarget.offers}</p>
+                {/* Swap preview box */}
+                <div className="mb-5 space-y-0 overflow-hidden" style={{ backgroundColor: "#F5F1E6", borderRadius: 10, padding: 14 }}>
+                  {/* YOU GIVE row */}
+                  <div className="flex items-center gap-3 pb-3" style={{ borderBottom: "1px dashed #C8D5CA" }}>
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide"
+                      style={{ border: "1px solid #6B9E7C", backgroundColor: "#EAF0EB", color: "#3D6B4F" }}
+                    >
+                      YOU GIVE
+                    </span>
+                    <span className="text-sm italic" style={{ color: proposalSkill ? "#1C1A14" : "#8A887E" }}>
+                      {proposalSkill || "Select your skill below"}
+                    </span>
+                  </div>
+                  {/* THEY GIVE row */}
+                  <div className="flex items-center gap-3 pt-3">
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide"
+                      style={{ border: "1px solid #B07A1A", backgroundColor: "#FBF0DC", color: "#B07A1A" }}
+                    >
+                      THEY GIVE
+                    </span>
+                    <span className="text-sm text-ink-soft">{proposalTarget.offers}</span>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
+                  {/* Skill dropdown */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ink">
-                      Your skill to offer in return
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#8A887E" }}>
+                      Your Skill
                     </label>
-                    <select
-                      value={proposalSkill}
-                      onChange={(e) => setProposalSkill(e.target.value)}
-                      className="w-full rounded-xl border border-cream-dark bg-white px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage/30"
-                    >
-                      <option value="">Select one of your skills</option>
-                      {MY_SKILLS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={proposalSkill}
+                        onChange={(e) => setProposalSkill(e.target.value)}
+                        className="w-full appearance-none rounded-xl border border-cream-dark px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-sage/30"
+                        style={{ backgroundColor: "#F5F1E6" }}
+                      >
+                        <option value="">Choose what you are offering..</option>
+                        {MY_SKILLS.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted">▾</span>
+                    </div>
                   </div>
 
+                  {/* Message textarea */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ink">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#8A887E" }}>
                       Message
                     </label>
                     <textarea
                       value={proposalMessage}
                       onChange={(e) => setProposalMessage(e.target.value)}
                       rows={4}
-                      placeholder={`Hi ${proposalTarget.name.split(" ")[0]}, I'd love to swap skills with you...`}
+                      placeholder={`Hi! I came across your listing and think we'd be a great match. I can offer [skill] exchange for [their skill]. I'm free on...`}
                       className="w-full resize-none rounded-xl border border-cream-dark bg-white px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
                     />
                   </div>
 
-                  <button
-                    onClick={handleSend}
-                    disabled={!proposalSkill || !proposalMessage.trim()}
-                    className="w-full rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Send proposal
-                  </button>
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      className="flex-1 rounded-xl border border-cream-dark bg-white py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSend}
+                      className="flex flex-[2] items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                      style={{ backgroundColor: "#1C1A14" }}
+                    >
+                      Send proposal
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </>
             )}
           </div>
         </div>
+      )}
+
+      {authPrompt && (
+        <AuthPromptModal onClose={() => setAuthPrompt(false)} />
       )}
     </div>
   );

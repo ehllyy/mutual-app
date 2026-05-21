@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftRight, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { login } from "@/lib/auth";
 
 /* ─── constants ─────────────────────────────────────────────────── */
 
@@ -29,81 +30,13 @@ const TESTIMONIALS = [
   },
   {
     initials: "NY",
-    avatarColor: "#C4763A",
+    avatarColor: "#C4571A",
     quote:
       "\"Traded piano lessons for Squarespace help. Found someone in my building through Mutual.\"",
     name: "Nam Y.",
     stars: 5,
   },
 ];
-
-/* ─── illustration ──────────────────────────────────────────────── */
-
-function Illustration() {
-  return (
-    <svg
-      viewBox="0 0 360 300"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full max-w-[320px]"
-      aria-hidden="true"
-    >
-      {/* background circle */}
-      <circle cx="180" cy="150" r="138" fill="#EDE9DA" />
-
-      {/* monitor */}
-      <rect x="95" y="68" width="170" height="118" rx="8" fill="#1C1A14" />
-      <rect x="103" y="76" width="154" height="102" rx="5" fill="#F5F1E6" />
-      {/* code lines */}
-      <rect x="117" y="92" width="88" height="5" rx="2.5" fill="#3D6B4F" opacity="0.7" />
-      <rect x="117" y="107" width="62" height="5" rx="2.5" fill="#8A887E" opacity="0.5" />
-      <rect x="117" y="122" width="108" height="5" rx="2.5" fill="#3D6B4F" opacity="0.4" />
-      <rect x="117" y="137" width="52" height="5" rx="2.5" fill="#C4763A" opacity="0.6" />
-      <rect x="117" y="152" width="78" height="5" rx="2.5" fill="#3D6B4F" opacity="0.3" />
-      {/* stand */}
-      <rect x="170" y="186" width="20" height="18" fill="#1C1A14" opacity="0.7" />
-      <rect x="148" y="202" width="64" height="8" rx="4" fill="#1C1A14" opacity="0.6" />
-
-      {/* left person */}
-      <circle cx="60" cy="160" r="20" fill="#D4A462" />
-      <path d="M 40 162 Q 60 146 80 162" fill="#3D2E18" opacity="0.85" />
-      <rect x="42" y="178" width="36" height="48" rx="10" fill="#4A4840" />
-
-      {/* right person */}
-      <circle cx="296" cy="136" r="21" fill="#C88850" />
-      <rect x="275" y="157" width="42" height="52" rx="10" fill="#C4763A" />
-      {/* tablet */}
-      <rect x="264" y="186" width="52" height="40" rx="6" fill="#1C1A14" opacity="0.85" />
-      <rect x="269" y="191" width="42" height="30" rx="3" fill="#EAF0EB" />
-      <rect x="275" y="198" width="30" height="3" rx="1.5" fill="#3D6B4F" opacity="0.5" />
-      <rect x="275" y="207" width="20" height="3" rx="1.5" fill="#8A887E" opacity="0.4" />
-      <rect x="275" y="216" width="26" height="3" rx="1.5" fill="#3D6B4F" opacity="0.3" />
-
-      {/* gear */}
-      <circle cx="318" cy="76" r="18" fill="none" stroke="#8A887E" strokeWidth="3" />
-      <circle cx="318" cy="76" r="9" fill="none" stroke="#8A887E" strokeWidth="2.5" />
-
-      {/* plant */}
-      <rect x="30" y="256" width="7" height="32" rx="3.5" fill="#8B5E3C" />
-      <ellipse cx="33" cy="246" rx="15" ry="20" fill="#3D6B4F" opacity="0.65" />
-      <ellipse cx="47" cy="241" rx="11" ry="15" fill="#3D6B4F" opacity="0.45" />
-      <ellipse cx="21" cy="243" rx="9" ry="13" fill="#6B9E7C" opacity="0.5" />
-
-      {/* floating code bracket */}
-      <text
-        x="175"
-        y="63"
-        fontSize="18"
-        fontFamily="monospace"
-        fill="#3D6B4F"
-        opacity="0.4"
-        textAnchor="middle"
-      >
-        {"</>"}
-      </text>
-    </svg>
-  );
-}
 
 /* ─── stars ─────────────────────────────────────────────────────── */
 
@@ -137,7 +70,7 @@ function Field({
 }
 
 const inputCls =
-  "w-full rounded-xl border border-cream-dark bg-white px-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30 transition-shadow";
+  "w-full rounded-lg border border-[#EDE9DA] bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30 transition-shadow";
 
 /* ─── page ───────────────────────────────────────────────────────── */
 
@@ -206,14 +139,25 @@ export default function AuthPage() {
     return Object.keys(e).length === 0;
   }
 
+  const searchParams = useSearchParams();
+
   function handleCreate(ev: React.FormEvent) {
     ev.preventDefault();
-    if (validateCreate()) router.push("/browse");
+    if (validateCreate()) {
+      login(`${firstName.trim()} ${lastName.trim()}`, email.trim());
+      window.dispatchEvent(new Event("mutual-auth-change"));
+      setTimeout(() => router.push("/browse"), 100);
+    }
   }
 
   function handleSignIn(ev: React.FormEvent) {
     ev.preventDefault();
-    if (validateSignIn()) router.push("/browse");
+    if (validateSignIn()) {
+      const nameFallback = siEmail.split("@")[0].replace(/[._]/g, " ");
+      login(nameFallback, siEmail.trim());
+      window.dispatchEvent(new Event("mutual-auth-change"));
+      setTimeout(() => router.push("/browse"), 100);
+    }
   }
 
   /* ─ render ─ */
@@ -221,7 +165,7 @@ export default function AuthPage() {
   return (
     <div className="flex min-h-screen">
       {/* ── LEFT PANEL ─────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[46%] flex-col bg-cream px-10 py-8 xl:px-16">
+      <div className="relative hidden lg:flex lg:w-[46%] flex-col bg-cream px-10 py-8 xl:px-16">
         {/* logo */}
         <Link href="/browse" className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
@@ -232,7 +176,7 @@ export default function AuthPage() {
 
         {/* illustration */}
         <div className="mt-8 flex justify-center">
-          <Illustration />
+          <img src="/sign_illustration.svg" alt="" aria-hidden="true" className="w-full max-w-[380px]" />
         </div>
 
         {/* tagline */}
@@ -243,7 +187,7 @@ export default function AuthPage() {
             <br />
             than money.
           </h2>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft" style={{ maxWidth: 480 }}>
             Mutual is a no-money skill exchange. List something you do well,
             ask for something you need help with — we&apos;ll match you with
             neighbours who fit.
@@ -251,58 +195,91 @@ export default function AuthPage() {
         </div>
 
         {/* testimonials */}
-        <div className="relative mt-8 h-52">
-          {/* back card */}
-          <div className="absolute left-10 top-4 w-[300px] rounded-2xl bg-white p-4 shadow-sm">
+        <div
+          className="absolute overflow-visible"
+          style={{ left: 63, bottom: 40, width: 527, height: 253 }}
+        >
+          {/* top rule */}
+          <div
+            className="absolute left-0 right-0"
+            style={{ top: 11, height: 1, backgroundColor: "#D4E8D8" }}
+          />
+
+          {/* card 1 — OE, Jaden B. */}
+          <div
+            className="absolute overflow-hidden"
+            style={{
+              left: 0,
+              top: 27,
+              width: "100%",
+              padding: 10,
+              backgroundColor: "rgba(255,255,255,0.8)",
+              border: "1px solid #D4E8D8",
+              borderRadius: 12,
+            }}
+          >
             <div className="flex items-start gap-3">
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ backgroundColor: TESTIMONIALS[1].avatarColor }}
+                className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                style={{ width: 38, height: 38, backgroundColor: "#1C1A14" }}
               >
-                {TESTIMONIALS[1].initials}
+                OE
               </div>
-              <p className="text-[13px] leading-snug text-ink-soft">
+              <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">
+                {TESTIMONIALS[0].quote}
+              </p>
+            </div>
+            <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
+              <span className="text-xs font-medium text-ink">{TESTIMONIALS[0].name}</span>
+              <Stars count={TESTIMONIALS[0].stars} />
+            </div>
+          </div>
+
+          {/* card 2 — NY, Nam Y. */}
+          <div
+            className="absolute z-10 overflow-hidden"
+            style={{
+              left: 75,
+              top: 115,
+              width: "100%",
+              padding: 10,
+              backgroundColor: "rgba(255,255,255,0.8)",
+              border: "1px solid #D4E8D8",
+              borderRadius: 12,
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                style={{ width: 38, height: 38, backgroundColor: "#C4571A" }}
+              >
+                NY
+              </div>
+              <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">
                 {TESTIMONIALS[1].quote}
               </p>
             </div>
-            <div className="mt-3 flex items-center justify-between pl-12">
-              <span className="text-xs font-medium text-ink">
-                {TESTIMONIALS[1].name}
-              </span>
+            <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
+              <span className="text-xs font-medium text-ink">{TESTIMONIALS[1].name}</span>
               <Stars count={TESTIMONIALS[1].stars} />
             </div>
           </div>
 
-          {/* front card */}
-          <div className="absolute bottom-0 left-0 z-10 w-[310px] rounded-2xl bg-white p-4 shadow-md">
-            <div className="flex items-start gap-3">
-              <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ backgroundColor: TESTIMONIALS[0].avatarColor }}
-              >
-                {TESTIMONIALS[0].initials}
-              </div>
-              <p className="text-[13px] leading-snug text-ink-soft">
-                {TESTIMONIALS[0].quote}
-              </p>
-            </div>
-            <div className="mt-3 flex items-center justify-between pl-12">
-              <span className="text-xs font-medium text-ink">
-                {TESTIMONIALS[0].name}
-              </span>
-              <Stars count={TESTIMONIALS[0].stars} />
-            </div>
-          </div>
+          {/* bottom rule */}
+          <div
+            className="absolute left-0 right-0"
+            style={{ top: 249, height: 1, backgroundColor: "#D4E8D8" }}
+          />
         </div>
       </div>
 
       {/* ── RIGHT PANEL ────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-white px-6 py-12 sm:px-10">
-        <div className="w-full max-w-[420px]">
+      <div className="flex flex-1 flex-col items-center overflow-y-auto bg-white px-6 sm:px-10" style={{ paddingTop: 80 }}>
+        <div className="w-full max-w-[420px] pb-12">
           {/* heading */}
           <div className="mb-6 text-center">
             <h1 className="font-display text-3xl font-bold text-ink">
-              {tab === "create" ? "Join Mutual" : "Welcome back"}
+              {tab === "create" ? "Join Mutual" : "Welcome Back"}
             </h1>
             <p className="mt-1.5 text-sm text-ink-muted">
               {tab === "create"
@@ -396,7 +373,7 @@ export default function AuthPage() {
                         onClick={() => toggleCat(cat)}
                         className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                           selected
-                            ? "border-ink bg-ink text-cream"
+                            ? "border-sage bg-sage-light text-sage"
                             : "border-cream-dark bg-white text-ink-soft hover:border-ink-muted hover:text-ink"
                         }`}
                       >
@@ -458,7 +435,15 @@ export default function AuthPage() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+                disabled={
+                  !firstName.trim() ||
+                  !lastName.trim() ||
+                  !email.trim() ||
+                  !neighbourhood.trim() ||
+                  !password ||
+                  !agreeTerms
+                }
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Create my account
                 <ArrowRight className="h-4 w-4" />
@@ -479,25 +464,32 @@ export default function AuthPage() {
                 />
               </Field>
 
-              <Field label="Password" error={errors.siPassword}>
-                <div className="relative">
-                  <input
-                    type={showSiPw ? "text" : "password"}
-                    placeholder="Your password"
-                    value={siPassword}
-                    onChange={(e) => { setSiPassword(e.target.value); clearError("siPassword"); }}
-                    className={inputCls + " pr-11"}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSiPw((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft"
-                    tabIndex={-1}
-                  >
-                    {showSiPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <div className="flex flex-col gap-1">
+                <Field label="Password" error={errors.siPassword}>
+                  <div className="relative">
+                    <input
+                      type={showSiPw ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={siPassword}
+                      onChange={(e) => { setSiPassword(e.target.value); clearError("siPassword"); }}
+                      className={inputCls + " pr-11"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSiPw((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink-soft"
+                      tabIndex={-1}
+                    >
+                      {showSiPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </Field>
+                <div className="flex justify-end">
+                  <button type="button" className="text-xs text-sage hover:underline underline-offset-2">
+                    Forgot password?
                   </button>
                 </div>
-              </Field>
+              </div>
 
               <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink-soft">
                 <input
@@ -509,23 +501,16 @@ export default function AuthPage() {
                 Remember me
               </label>
 
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
-              >
-                Sign in
-              </button>
-
-              <p className="text-center text-sm text-ink-muted">
-                Don&apos;t have an account?{" "}
+              <div className="pt-2">
                 <button
-                  type="button"
-                  onClick={() => { setTab("create"); setErrors({}); }}
-                  className="font-medium text-ink underline-offset-2 hover:underline"
+                  type="submit"
+                  disabled={!siEmail.trim() || !siPassword}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Create one
+                  Sign in
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-              </p>
+              </div>
             </form>
           )}
         </div>

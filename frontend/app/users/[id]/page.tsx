@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { MapPin, ArrowLeftRight, MessageCircle, X, Send } from "lucide-react";
+import { isLoggedIn } from "@/lib/auth";
 
 /* ─── pill colours ──────────────────────────────────────────────── */
 
@@ -32,10 +33,8 @@ interface UserProfile {
   bio: string;
   skillsOffer: string[];
   skillsNeed: string[];
-  availability: boolean[];
 }
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MY_SKILLS = ["Design", "React", "B2 German"];
 
 const USERS: UserProfile[] = [
@@ -48,7 +47,6 @@ const USERS: UserProfile[] = [
     bio: "I'm a UI/UX designer with 4 years of experience — I've worked on fintech apps and a few consumer products. I'm great at user flows, interactive Figma prototypes, and design systems. Outside of design I'm slowly learning to fix things around my apartment and would love help from someone who actually knows what they're doing. Always up for a swap, online or in person locally.",
     skillsOffer: ["Design", "React", "B2 German"],
     skillsNeed: ["Furniture repair", "French lessons", "Cooking lessons"],
-    availability: [false, false, true, false, true, true, true],
   },
   {
     id: 2,
@@ -59,7 +57,6 @@ const USERS: UserProfile[] = [
     bio: "Natural hair specialist with 5+ years helping people embrace their curls and coils. Based in Labone but happy to travel across Accra. Looking to level up my coding skills — even just learning Python basics would open so many doors for managing my client bookings.",
     skillsOffer: ["Hair braiding", "Natural hair styling", "Locs maintenance"],
     skillsNeed: ["Python basics", "Website help"],
-    availability: [false, true, false, true, false, true, false],
   },
   {
     id: 3,
@@ -70,7 +67,6 @@ const USERS: UserProfile[] = [
     bio: "Guitarist and music teacher who plays Afrobeats, highlife, and a bit of jazz. Been teaching guitar since 2018. Looking to make my apartment feel more like home — need someone with a good eye for interior design.",
     skillsOffer: ["Guitar lessons", "Music theory", "Afrobeats rhythms"],
     skillsNeed: ["Interior design", "Home decor advice"],
-    availability: [true, false, false, true, false, true, true],
   },
   {
     id: 4,
@@ -81,7 +77,6 @@ const USERS: UserProfile[] = [
     bio: "Home cook turned community cook. I can teach you how to make proper Ghanaian jollof rice, banku, kontomire stew, and more. My sessions are hands-on and very relaxed. Looking for someone to teach me yoga — I have a bad back and need to start moving.",
     skillsOffer: ["Jollof rice & Ghanaian cooking", "Baking", "Meal prep"],
     skillsNeed: ["Yoga classes", "Meditation basics"],
-    availability: [false, false, false, true, true, true, true],
   },
   {
     id: 5,
@@ -92,7 +87,6 @@ const USERS: UserProfile[] = [
     bio: "Journeyman plumber and electrician with 10 years in the trade. Can fix leaks, install fittings, and sort out basic wiring. You provide the parts, I provide the know-how. Looking for help with my son's WASSCE maths — he's struggling and I want to help him pass.",
     skillsOffer: ["Plumbing", "Electrical repairs", "Tiling"],
     skillsNeed: ["WASSCE Maths tutoring", "Physics tutoring"],
-    availability: [true, true, false, false, false, true, false],
   },
   {
     id: 6,
@@ -103,7 +97,6 @@ const USERS: UserProfile[] = [
     bio: "Tamale-based French teacher who learned the language during two years in Senegal. I teach conversational French for beginners and intermediate speakers. Want to learn how to build websites — even a simple portfolio page would open new opportunities.",
     skillsOffer: ["French language", "Arabic basics"],
     skillsNeed: ["React development", "Web design basics"],
-    availability: [false, true, true, false, true, false, false],
   },
   {
     id: 7,
@@ -114,7 +107,6 @@ const USERS: UserProfile[] = [
     bio: "Freelance photographer based in Accra. I shoot weddings, portraits, and street photography. Also do Lightroom editing and can teach photo composition basics. Trying to get into fitness but don't know where to start — would love a structured beginner program.",
     skillsOffer: ["Photography", "Lightroom editing", "Photo composition"],
     skillsNeed: ["Personal training", "Nutrition basics"],
-    availability: [false, false, true, true, false, true, true],
   },
   {
     id: 8,
@@ -125,7 +117,6 @@ const USERS: UserProfile[] = [
     bio: "Certified personal trainer and group fitness instructor. I specialise in HIIT, functional training, and helping beginners build gym confidence. I run a small tailoring business on the side and need help with branding and marketing materials.",
     skillsOffer: ["HIIT training", "Functional fitness", "Nutrition coaching"],
     skillsNeed: ["Graphic design", "Social media content"],
-    availability: [true, true, false, true, true, false, false],
   },
   {
     id: 9,
@@ -136,7 +127,6 @@ const USERS: UserProfile[] = [
     bio: "Full-stack developer working with React and Next.js. Remote-first, based in Ho but happy to do sessions online. Looking to reconnect with my roots — want to properly learn Ewe and improve my Twi, which is very rusty.",
     skillsOffer: ["React development", "Next.js", "REST APIs"],
     skillsNeed: ["Ewe language lessons", "Twi language lessons"],
-    availability: [false, false, false, false, false, true, true],
   },
 ];
 
@@ -146,10 +136,23 @@ export default function UserProfilePage() {
   const { id } = useParams() as { id: string };
   const user = USERS.find((u) => u.id === Number(id)) ?? USERS[0];
 
+  const [loggedIn, setLoggedIn] = useState(false);
+  useEffect(() => { setLoggedIn(isLoggedIn()); }, []);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [proposalSkill, setProposalSkill] = useState("");
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
+
+  const [msgModalOpen, setMsgModalOpen] = useState(false);
+  const [msgText, setMsgText] = useState("");
+  const [msgToast, setMsgToast] = useState(false);
+
+  useEffect(() => {
+    if (!msgToast) return;
+    const t = setTimeout(() => setMsgToast(false), 3000);
+    return () => clearTimeout(t);
+  }, [msgToast]);
 
   function openModal() {
     setModalOpen(true);
@@ -208,13 +211,13 @@ export default function UserProfilePage() {
                 <ArrowLeftRight className="h-4 w-4" />
                 Propose a swap
               </button>
-              <Link
-                href="/messages"
+              <button
+                onClick={() => { setMsgModalOpen(true); setMsgText(""); }}
                 className="flex flex-[2] items-center justify-center gap-2 rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
               >
                 <MessageCircle className="h-4 w-4" />
                 Send a message
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -272,28 +275,71 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        {/* ── AVAILABILITY ──────────────────────────────────── */}
-        <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-            Availability
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {DAYS.map((day, i) => (
-              <div
-                key={day}
-                className={`flex h-12 w-12 flex-col items-center justify-center rounded-full text-xs font-semibold ${
-                  user.availability[i]
-                    ? "bg-sage text-white"
-                    : "bg-cream-dark text-ink-muted"
-                }`}
+      </div>
+
+      {/* ── SEND A MESSAGE MODAL ──────────────────────────── */}
+      {msgModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
+          onClick={() => setMsgModalOpen(false)}
+        >
+          <div
+            className="w-full bg-white p-8"
+            style={{ maxWidth: 440, borderRadius: 16 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5 flex items-start justify-between">
+              <h3 className="font-display text-lg font-bold text-ink">
+                Send a message to {user.name}
+              </h3>
+              <button
+                onClick={() => setMsgModalOpen(false)}
+                className="rounded-full p-1.5 text-ink-muted transition-colors hover:bg-cream-dark"
               >
-                {day}
-              </div>
-            ))}
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <textarea
+              value={msgText}
+              onChange={(e) => setMsgText(e.target.value)}
+              rows={5}
+              placeholder="Hi! I came across your profile and wanted to reach out..."
+              className="w-full resize-none rounded-xl border border-[#EDE9DA] bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
+            />
+
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setMsgModalOpen(false)}
+                className="flex flex-1 items-center justify-center rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setMsgModalOpen(false);
+                  setMsgToast(true);
+                }}
+                disabled={!msgText.trim()}
+                className="flex flex-[2] items-center justify-center rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ backgroundColor: "#1C1A14" }}
+              >
+                Send message
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-      </div>
+      {/* ── TOAST ─────────────────────────────────────────── */}
+      {msgToast && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg"
+          style={{ backgroundColor: "#1C1A14" }}
+        >
+          Message sent!
+        </div>
+      )}
 
       {/* ── PROPOSE A SWAP MODAL ──────────────────────────── */}
       {modalOpen && (

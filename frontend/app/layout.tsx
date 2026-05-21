@@ -31,9 +31,9 @@ export default function RootLayout({
       lang="en"
       className={`${dmSans.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="overflow-hidden h-screen flex flex-col">
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="overflow-hidden flex-1">{children}</main>
       </body>
     </html>
   );

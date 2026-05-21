@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, Send } from "lucide-react";
+import { isLoggedIn } from "@/lib/auth";
 
 /* ─── types ──────────────────────────────────────────────────────── */
 
@@ -121,6 +123,12 @@ const THREADS: Thread[] = [
 /* ─── page ───────────────────────────────────────────────────────── */
 
 export default function MessagesPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoggedIn()) router.push("/auth");
+  }, []);
+
   const [threads, setThreads] = useState(THREADS);
   const [selectedId, setSelectedId] = useState(THREADS[2].id);
   const [newMessage, setNewMessage] = useState("");
@@ -169,10 +177,10 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-cream">
+    <div className="flex overflow-hidden" style={{ height: "calc(100vh - 60px)" }}>
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <div className="flex w-72 shrink-0 flex-col border-r border-cream-dark bg-white">
+      <div className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-r border-cream-dark bg-white">
 
         {/* heading */}
         <div className="px-5 pt-6 pb-4">
@@ -260,7 +268,7 @@ export default function MessagesPage() {
       </div>
 
       {/* ── RIGHT CHAT AREA ──────────────────────────────────── */}
-      <div className="flex flex-1 flex-col bg-cream">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-cream">
 
         {/* chat header */}
         <div className="flex items-center gap-3 border-b border-cream-dark bg-white px-6 py-4">
