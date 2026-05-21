@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftRight, Eye, EyeOff, ArrowRight } from "lucide-react";
@@ -74,7 +74,7 @@ const inputCls =
 
 /* ─── page ───────────────────────────────────────────────────────── */
 
-export default function AuthPage() {
+function AuthContent() {
   const router = useRouter();
   const [tab, setTab] = useState<"create" | "signin">("create");
 
@@ -516,5 +516,13 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <AuthContent />
+    </Suspense>
   );
 }
