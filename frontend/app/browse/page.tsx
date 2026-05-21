@@ -190,7 +190,7 @@ export default function BrowsePage() {
     <div className="min-h-screen bg-cream">
       {/* Hero */}
       <div className="mx-auto max-w-6xl px-4 pt-12 pb-8 sm:px-6">
-        <h1 className="font-display text-5xl font-bold leading-[1.1] text-ink sm:text-6xl">
+        <h1 className="font-display text-3xl font-bold leading-[1.1] text-ink md:text-5xl">
           Trade what you know
           <br />
           <span className="italic text-sage">for what you need.</span>

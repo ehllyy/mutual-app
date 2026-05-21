@@ -69,8 +69,10 @@ function Field({
   );
 }
 
-const inputCls =
-  "w-full rounded-lg border border-[#EDE9DA] bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30 transition-shadow";
+function inputCls(value: string, extra = "") {
+  const border = value ? "border-[#3D6B4F]" : "border-[#EDE9DA]";
+  return `w-full rounded-lg border ${border} bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30 transition-shadow${extra ? " " + extra : ""}`;
+}
 
 /* ─── page ───────────────────────────────────────────────────────── */
 
@@ -323,7 +325,7 @@ function AuthContent() {
                     placeholder="Enter your first name"
                     value={firstName}
                     onChange={(e) => { setFirstName(e.target.value); clearError("firstName"); }}
-                    className={inputCls}
+                    className={inputCls(firstName)}
                   />
                 </Field>
                 <Field label="Last name" error={errors.lastName}>
@@ -332,7 +334,7 @@ function AuthContent() {
                     placeholder="Enter your last name"
                     value={lastName}
                     onChange={(e) => { setLastName(e.target.value); clearError("lastName"); }}
-                    className={inputCls}
+                    className={inputCls(lastName)}
                   />
                 </Field>
               </div>
@@ -343,7 +345,7 @@ function AuthContent() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); clearError("email"); }}
-                  className={inputCls}
+                  className={inputCls(email)}
                 />
               </Field>
 
@@ -353,7 +355,7 @@ function AuthContent() {
                   placeholder="e.g. Osu, Accra"
                   value={neighbourhood}
                   onChange={(e) => { setNeighbourhood(e.target.value); clearError("neighbourhood"); }}
-                  className={inputCls}
+                  className={inputCls(neighbourhood)}
                 />
               </Field>
 
@@ -395,7 +397,7 @@ function AuthContent() {
                     placeholder="At least 8 characters"
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); clearError("password"); }}
-                    className={inputCls + " pr-11"}
+                    className={inputCls(password, "pr-11")}
                   />
                   <button
                     type="button"
@@ -460,7 +462,7 @@ function AuthContent() {
                   placeholder="you@example.com"
                   value={siEmail}
                   onChange={(e) => { setSiEmail(e.target.value); clearError("siEmail"); }}
-                  className={inputCls}
+                  className={inputCls(siEmail)}
                 />
               </Field>
 
@@ -472,7 +474,7 @@ function AuthContent() {
                       placeholder="Enter your password"
                       value={siPassword}
                       onChange={(e) => { setSiPassword(e.target.value); clearError("siPassword"); }}
-                      className={inputCls + " pr-11"}
+                      className={inputCls(siPassword, "pr-11")}
                     />
                     <button
                       type="button"

@@ -203,17 +203,17 @@ export default function UserProfilePage() {
             </div>
 
             {/* CTA buttons */}
-            <div className="mt-5 flex gap-3">
+            <div className="mt-5 flex flex-col gap-3 md:flex-row">
               <button
                 onClick={openModal}
-                className="flex flex-[3] items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft md:flex-[3]"
               >
                 <ArrowLeftRight className="h-4 w-4" />
                 Propose a swap
               </button>
               <button
                 onClick={() => { setMsgModalOpen(true); setMsgText(""); }}
-                className="flex flex-[2] items-center justify-center gap-2 rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink md:flex-[2]"
               >
                 <MessageCircle className="h-4 w-4" />
                 Send a message

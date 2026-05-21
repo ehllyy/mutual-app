@@ -81,6 +81,16 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          {user && (
+            <Link
+              href="/messages"
+              className={`text-sm font-medium transition-colors md:hidden ${
+                pathname.startsWith("/messages") ? "text-ink" : "text-ink-muted hover:text-ink-soft"
+              }`}
+            >
+              Chats
+            </Link>
+          )}
           <button
             onClick={() => user ? router.push("/post-skill") : setAuthPrompt(true)}
             className="hidden items-center gap-1.5 rounded-full border border-ink px-4 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-cream md:flex"
