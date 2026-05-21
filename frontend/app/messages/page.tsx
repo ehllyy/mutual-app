@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Send } from "lucide-react";
+import { Search, Send, ArrowLeft } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
 
 /* ─── types ──────────────────────────────────────────────────────── */
@@ -134,6 +134,7 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [showChat, setShowChat] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const selected = threads.find((t) => t.id === selectedId)!;
@@ -152,6 +153,7 @@ export default function MessagesPage() {
 
   function selectThread(id: number) {
     setSelectedId(id);
+    setShowChat(true);
     setThreads((prev) =>
       prev.map((t) => (t.id === id ? { ...t, unread: 0 } : t))
     );
@@ -180,7 +182,7 @@ export default function MessagesPage() {
     <div style={{ position: "fixed", top: 60, left: 0, right: 0, bottom: 0, display: "flex", overflow: "hidden" }}>
 
       {/* ── LEFT SIDEBAR ─────────────────────────────────────── */}
-      <div className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-r border-cream-dark bg-white">
+      <div className={`${showChat ? "hidden" : "flex"} md:flex w-full md:w-[280px] shrink-0 flex-col overflow-y-auto border-r border-cream-dark bg-white`}>
 
         {/* heading */}
         <div className="px-5 pt-6 pb-4">
@@ -268,10 +270,16 @@ export default function MessagesPage() {
       </div>
 
       {/* ── RIGHT CHAT AREA ──────────────────────────────────── */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-cream">
+      <div className={`${showChat ? "flex" : "hidden"} md:flex min-w-0 flex-1 flex-col overflow-hidden bg-cream`}>
 
         {/* chat header */}
-        <div className="flex items-center gap-3 border-b border-cream-dark bg-white px-6 py-4">
+        <div className="flex items-center gap-3 border-b border-cream-dark bg-white px-4 py-4 md:px-6">
+          <button
+            onClick={() => setShowChat(false)}
+            className="mr-1 flex shrink-0 items-center justify-center rounded-full p-1.5 text-ink-muted transition-colors hover:bg-cream-dark md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <div className="relative shrink-0">
             <div
               className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-semibold text-white"
