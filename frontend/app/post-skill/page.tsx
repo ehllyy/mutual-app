@@ -58,6 +58,15 @@ export default function PostSkillPage() {
     <div className="min-h-screen bg-cream py-8">
       <div className="mx-auto max-w-[600px] px-4 sm:px-6">
 
+        {/* back button — mobile only */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 py-3 md:hidden"
+          style={{ fontSize: 14, color: "#4A4840" }}
+        >
+          ← Back
+        </button>
+
         {/* page heading */}
         <h1 className="font-display text-3xl font-bold text-ink">Post a Skill</h1>
         <p className="mb-6 mt-2 text-sm text-ink-soft">

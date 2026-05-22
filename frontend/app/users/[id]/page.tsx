@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MapPin, ArrowLeftRight, X, Send } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
@@ -135,6 +135,7 @@ const USERS: UserProfile[] = [
 
 export default function UserProfilePage() {
   const { id } = useParams() as { id: string };
+  const router = useRouter();
   const user = USERS.find((u) => u.id === Number(id)) ?? USERS[0];
 
   const [loggedIn, setLoggedIn] = useState(false);
@@ -166,6 +167,15 @@ export default function UserProfilePage() {
   return (
     <div className="min-h-screen bg-cream py-8">
       <div className="mx-auto max-w-[760px] space-y-4 px-4 sm:px-6">
+
+        {/* back button — mobile only */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 py-3 md:hidden"
+          style={{ fontSize: 14, color: "#4A4840" }}
+        >
+          ← Browse Skills
+        </button>
 
         {/* ── PROFILE HEADER CARD ───────────────────────────── */}
         <div className="overflow-hidden rounded-2xl border border-cream-dark bg-white shadow-sm">
