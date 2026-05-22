@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { MapPin, ArrowLeftRight, X, Send } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
+import AuthPromptModal from "@/components/AuthPromptModal";
 
 /* ─── pill colours ──────────────────────────────────────────────── */
 
@@ -139,12 +140,14 @@ export default function UserProfilePage() {
   const [loggedIn, setLoggedIn] = useState(false);
   useEffect(() => { setLoggedIn(isLoggedIn()); }, []);
 
+  const [authPrompt, setAuthPrompt] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [proposalSkill, setProposalSkill] = useState("");
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
 
   function openModal() {
+    if (!loggedIn) { setAuthPrompt(true); return; }
     setModalOpen(true);
     setProposalSent(false);
     setProposalSkill("");
@@ -259,6 +262,13 @@ export default function UserProfilePage() {
         </div>
 
       </div>
+
+      {authPrompt && (
+        <AuthPromptModal
+          title="Join Mutual to propose a swap"
+          onClose={() => setAuthPrompt(false)}
+        />
+      )}
 
       {/* ── PROPOSE A SWAP MODAL ──────────────────────────── */}
       {modalOpen && (
