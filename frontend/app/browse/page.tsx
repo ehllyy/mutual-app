@@ -147,6 +147,7 @@ const MY_SKILLS = ["UI/UX Design (Figma)", "Wireframing", "User Research"];
 
 export default function BrowsePage() {
   const [search, setSearch] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
   const [activeCategory, setActiveCategory] = useState("All Skills");
   const [proposalTarget, setProposalTarget] = useState<SkillListing | null>(null);
   const [proposalSkill, setProposalSkill] = useState("");
@@ -163,7 +164,9 @@ export default function BrowsePage() {
       s.offers.toLowerCase().includes(q) ||
       s.needs.toLowerCase().includes(q) ||
       s.name.toLowerCase().includes(q);
-    return matchCat && matchSearch;
+    const loc = locationFilter.toLowerCase();
+    const matchLocation = !loc || s.location.toLowerCase().includes(loc);
+    return matchCat && matchSearch && matchLocation;
   });
 
   function openModal(listing: SkillListing) {
@@ -201,18 +204,33 @@ export default function BrowsePage() {
         </p>
 
         {/* Search bar */}
-        <div className="mt-8 flex items-stretch gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+        <div className="mt-8 flex flex-col gap-2 md:flex-row md:items-stretch">
+          <div className="flex flex-1 items-stretch gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search skills or location..."
+                className="h-12 w-full rounded-[12px] border border-cream-dark bg-white pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
+              />
+            </div>
+            <button className="h-12 shrink-0 rounded-[12px] bg-ink px-6 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft md:hidden">
+              Search
+            </button>
+          </div>
+          <div className="relative flex-1 md:max-w-[260px]">
+            <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
             <input
               type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by skills, e.g. hairdressing or piano lessons...."
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              placeholder="Neighbourhood or area..."
               className="h-12 w-full rounded-[12px] border border-cream-dark bg-white pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
             />
           </div>
-          <button className="h-12 rounded-[12px] bg-ink px-6 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft">
+          <button className="hidden h-12 shrink-0 rounded-[12px] bg-ink px-6 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft md:block">
             Search
           </button>
         </div>

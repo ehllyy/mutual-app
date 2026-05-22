@@ -322,7 +322,7 @@ function AuthContent() {
                 <Field label="First name" error={errors.firstName}>
                   <input
                     type="text"
-                    placeholder="Enter your first name"
+                    placeholder="First name"
                     value={firstName}
                     onChange={(e) => { setFirstName(e.target.value); clearError("firstName"); }}
                     className={inputCls(firstName)}
@@ -331,7 +331,7 @@ function AuthContent() {
                 <Field label="Last name" error={errors.lastName}>
                   <input
                     type="text"
-                    placeholder="Enter your last name"
+                    placeholder="Last name"
                     value={lastName}
                     onChange={(e) => { setLastName(e.target.value); clearError("lastName"); }}
                     className={inputCls(lastName)}

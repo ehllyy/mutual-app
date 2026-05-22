@@ -93,6 +93,13 @@ export default function Navbar() {
           )}
           <button
             onClick={() => user ? router.push("/post-skill") : setAuthPrompt(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-ink text-ink transition-colors hover:bg-ink hover:text-cream md:hidden"
+            aria-label="List a skill"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => user ? router.push("/post-skill") : setAuthPrompt(true)}
             className="hidden items-center gap-1.5 rounded-full border border-ink px-4 py-1.5 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-cream md:flex"
           >
             <Plus className="h-3.5 w-3.5" />

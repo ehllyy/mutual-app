@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(curl -s \"http://localhost:3000/post-skill\" -o /dev/null -w \"%{http_code}\")",
-      "Bash(curl -s \"http://localhost:3000/post-skill\")"
+      "Bash(curl -s \"http://localhost:3000/post-skill\")",
+      "Bash(Select-String -Path \"c:\\\\Users\\\\Eleanor\\\\Desktop\\\\mutual-app\\\\frontend\\\\app\\\\browse\\\\page.tsx\" -Pattern \"AuthPromptModal|authPrompt\" -n)"
     ]
   }
 }
