@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { MapPin, ArrowLeftRight, MessageCircle, X, Send } from "lucide-react";
+import { MapPin, ArrowLeftRight, X, Send } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
 
 /* ─── pill colours ──────────────────────────────────────────────── */
@@ -144,16 +144,6 @@ export default function UserProfilePage() {
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
 
-  const [msgModalOpen, setMsgModalOpen] = useState(false);
-  const [msgText, setMsgText] = useState("");
-  const [msgToast, setMsgToast] = useState(false);
-
-  useEffect(() => {
-    if (!msgToast) return;
-    const t = setTimeout(() => setMsgToast(false), 3000);
-    return () => clearTimeout(t);
-  }, [msgToast]);
-
   function openModal() {
     setModalOpen(true);
     setProposalSent(false);
@@ -202,21 +192,14 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            {/* CTA buttons */}
-            <div className="mt-5 flex flex-col gap-3 md:flex-row">
+            {/* CTA button */}
+            <div className="mt-5">
               <button
                 onClick={openModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft md:flex-[3]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
               >
                 <ArrowLeftRight className="h-4 w-4" />
                 Propose a swap
-              </button>
-              <button
-                onClick={() => { setMsgModalOpen(true); setMsgText(""); }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink md:flex-[2]"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Send a message
               </button>
             </div>
           </div>
@@ -276,70 +259,6 @@ export default function UserProfilePage() {
         </div>
 
       </div>
-
-      {/* ── SEND A MESSAGE MODAL ──────────────────────────── */}
-      {msgModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
-          onClick={() => setMsgModalOpen(false)}
-        >
-          <div
-            className="w-full bg-white p-8"
-            style={{ maxWidth: 440, borderRadius: 16 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-5 flex items-start justify-between">
-              <h3 className="font-display text-lg font-bold text-ink">
-                Send a message to {user.name}
-              </h3>
-              <button
-                onClick={() => setMsgModalOpen(false)}
-                className="rounded-full p-1.5 text-ink-muted transition-colors hover:bg-cream-dark"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <textarea
-              value={msgText}
-              onChange={(e) => setMsgText(e.target.value)}
-              rows={5}
-              placeholder="Hi! I came across your profile and wanted to reach out..."
-              className="w-full resize-none rounded-xl border border-[#EDE9DA] bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
-            />
-
-            <div className="mt-5 flex gap-3">
-              <button
-                onClick={() => setMsgModalOpen(false)}
-                className="flex flex-1 items-center justify-center rounded-xl border border-cream-dark py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setMsgModalOpen(false);
-                  setMsgToast(true);
-                }}
-                disabled={!msgText.trim()}
-                className="flex min-h-[48px] flex-[2] items-center justify-center rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ backgroundColor: "#1C1A14" }}
-              >
-                Send message
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── TOAST ─────────────────────────────────────────── */}
-      {msgToast && (
-        <div
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg"
-          style={{ backgroundColor: "#1C1A14" }}
-        >
-          Message sent!
-        </div>
-      )}
 
       {/* ── PROPOSE A SWAP MODAL ──────────────────────────── */}
       {modalOpen && (
