@@ -201,7 +201,7 @@ export default function BrowsePage() {
         </p>
 
         {/* Search bar */}
-        <div className="mt-8 flex gap-2">
+        <div className="mt-8 flex items-stretch gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
             <input
@@ -209,10 +209,10 @@ export default function BrowsePage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by skills, e.g. hairdressing or piano lessons...."
-              className="w-full rounded-[12px] border border-cream-dark bg-white py-3 pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
+              className="h-12 w-full rounded-[12px] border border-cream-dark bg-white pl-11 pr-4 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
             />
           </div>
-          <button className="rounded-[12px] bg-ink px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft">
+          <button className="h-12 rounded-[12px] bg-ink px-6 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft">
             Search
           </button>
         </div>
@@ -315,14 +315,13 @@ export default function BrowsePage() {
                       {listing.category}
                     </span>
 
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className="mt-3 flex items-stretch gap-2">
                       <button
                         onClick={() => openModal(listing)}
-                        className="flex flex-1 items-center justify-center gap-1.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                        className="flex h-11 flex-1 items-center justify-center gap-1.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
                         style={{
                           backgroundColor: "#1C1A14",
                           borderRadius: "8px",
-                          minHeight: "48px",
                         }}
                       >
                         Propose a swap
@@ -330,9 +329,8 @@ export default function BrowsePage() {
                       </button>
                       <Link
                         href={`/users/${listing.id}`}
-                        className="flex shrink-0 items-center justify-center px-4 py-3 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
+                        className="flex h-11 shrink-0 items-center justify-center px-4 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
                         style={{
-                          minHeight: "48px",
                           backgroundColor: "white",
                           border: "1px solid #EAF0EB",
                           borderRadius: "8px",
