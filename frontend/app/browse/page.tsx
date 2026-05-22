@@ -322,7 +322,7 @@ export default function BrowsePage() {
                         style={{
                           backgroundColor: "#1C1A14",
                           borderRadius: "8px",
-                          height: "38px",
+                          minHeight: "48px",
                         }}
                       >
                         Propose a swap
@@ -330,10 +330,9 @@ export default function BrowsePage() {
                       </button>
                       <Link
                         href={`/users/${listing.id}`}
-                        className="flex shrink-0 items-center justify-center text-sm font-medium text-ink-soft transition-colors hover:text-ink"
+                        className="flex shrink-0 items-center justify-center px-4 py-3 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
                         style={{
-                          width: "106px",
-                          height: "38px",
+                          minHeight: "48px",
                           backgroundColor: "white",
                           border: "1px solid #EAF0EB",
                           borderRadius: "8px",
@@ -472,7 +471,7 @@ export default function BrowsePage() {
                     </button>
                     <button
                       onClick={handleSend}
-                      className="flex flex-[2] items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                      className="flex min-h-[48px] flex-[2] items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
                       style={{ backgroundColor: "#1C1A14" }}
                     >
                       Send proposal

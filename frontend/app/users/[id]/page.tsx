@@ -321,7 +321,7 @@ export default function UserProfilePage() {
                   setMsgToast(true);
                 }}
                 disabled={!msgText.trim()}
-                className="flex flex-[2] items-center justify-center rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex min-h-[48px] flex-[2] items-center justify-center rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                 style={{ backgroundColor: "#1C1A14" }}
               >
                 Send message

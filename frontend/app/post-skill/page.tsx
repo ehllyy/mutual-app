@@ -225,14 +225,14 @@ export default function PostSkillPage() {
           <button
             type="button"
             onClick={() => router.push("/browse")}
-            className="flex-1 rounded-xl border border-cream-dark py-3 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
+            className="min-h-[48px] flex-1 rounded-xl border border-cream-dark py-3 text-sm font-semibold text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handlePost}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+            className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
           >
             <Send className="h-4 w-4" />
             Post listing
