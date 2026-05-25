@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { MapPin, ArrowLeftRight, X, Send } from "lucide-react";
+import { MapPin, ArrowLeftRight, X, Send, ChevronLeft } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
 import AuthPromptModal from "@/components/AuthPromptModal";
 
@@ -166,16 +166,18 @@ export default function UserProfilePage() {
 
   return (
     <div className="min-h-screen bg-cream py-8">
-      <div className="mx-auto max-w-[760px] space-y-4 px-4 sm:px-6">
 
-        {/* back button — mobile only */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 py-3 md:hidden"
-          style={{ fontSize: 14, color: "#4A4840" }}
-        >
-          ← Browse Skills
-        </button>
+      {/* back button — mobile only */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-1 md:hidden"
+        style={{ padding: "4px 16px", fontSize: 14, color: "#4A4840", background: "none", border: "none" }}
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Browse Skills
+      </button>
+
+      <div className="mx-auto max-w-[760px] space-y-4 px-4 sm:px-6">
 
         {/* ── PROFILE HEADER CARD ───────────────────────────── */}
         <div className="overflow-hidden rounded-2xl border border-cream-dark bg-white shadow-sm">

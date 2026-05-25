@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, ArrowUpDown, Send } from "lucide-react";
+import { ArrowLeftRight, ArrowUpDown, Send, ChevronLeft } from "lucide-react";
 
 /* ─── data ───────────────────────────────────────────────────────── */
 
@@ -56,16 +56,18 @@ export default function PostSkillPage() {
 
   return (
     <div className="min-h-screen bg-cream py-8">
-      <div className="mx-auto max-w-[600px] px-4 sm:px-6">
 
-        {/* back button — mobile only */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 py-3 md:hidden"
-          style={{ fontSize: 14, color: "#4A4840" }}
-        >
-          ← Back
-        </button>
+      {/* back button — mobile only */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-1 md:hidden"
+        style={{ padding: "4px 16px", fontSize: 14, color: "#4A4840", background: "none", border: "none" }}
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Back
+      </button>
+
+      <div className="mx-auto max-w-[600px] px-4 sm:px-6">
 
         {/* page heading */}
         <h1 className="font-display text-3xl font-bold text-ink">Post a Skill</h1>
