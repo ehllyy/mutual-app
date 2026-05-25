@@ -3,7 +3,10 @@
     "allow": [
       "Bash(curl -s \"http://localhost:3000/post-skill\" -o /dev/null -w \"%{http_code}\")",
       "Bash(curl -s \"http://localhost:3000/post-skill\")",
-      "Bash(Select-String -Path \"c:\\\\Users\\\\Eleanor\\\\Desktop\\\\mutual-app\\\\frontend\\\\app\\\\browse\\\\page.tsx\" -Pattern \"AuthPromptModal|authPrompt\" -n)"
+      "Bash(Select-String -Path \"c:\\\\Users\\\\Eleanor\\\\Desktop\\\\mutual-app\\\\frontend\\\\app\\\\browse\\\\page.tsx\" -Pattern \"AuthPromptModal|authPrompt\" -n)",
+      "Bash(Test-Path \"C:\\\\Users\\\\Eleanor\\\\Desktop\\\\mutual-app\\\\README.md\")",
+      "Bash(grep -o '\"Create a README.*' \"C:\\\\Users\\\\Eleanor\\\\.claude\\\\projects\\\\c--Users-Eleanor-Desktop-mutual-app\\\\ef4f0c68-9e21-45e2-b0e1-cf2f16a63d24.jsonl\" | head -5)",
+      "Read(//c/Users/Eleanor/.claude/projects/c--Users-Eleanor-Desktop-mutual-app/**)"
     ]
   }
 }
