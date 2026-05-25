@@ -177,102 +177,80 @@ function AuthContent() {
           <span className="text-lg font-semibold text-ink">Mutual</span>
         </Link>
 
-        {/* illustration */}
-        <div className="mt-8 flex justify-center">
-          <img src="/sign_illustration.svg" alt="" aria-hidden="true" className="w-full max-w-[380px]" />
-        </div>
-
-        {/* tagline */}
-        <div className="mt-4">
-          <h2 className="font-display text-4xl font-bold leading-tight text-ink xl:text-[2.6rem]">
-            Your skills are{" "}
-            <span className="italic text-sage">worth more</span>
-            <br />
-            than money.
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-ink-soft" style={{ maxWidth: 480 }}>
-            Mutual is a no-money skill exchange. List something you do well,
-            ask for something you need help with — we&apos;ll match you with
-            neighbours who fit.
-          </p>
-        </div>
-
-        {/* testimonials */}
-        <div
-          className="absolute overflow-visible"
-          style={{ left: 63, bottom: 40, width: 527, height: 253 }}
-        >
-          {/* top rule */}
-          <div
-            className="absolute left-0 right-0"
-            style={{ top: 11, height: 1, backgroundColor: "#D4E8D8" }}
-          />
-
-          {/* card 1 — OE, Jaden B. */}
-          <div
-            className="absolute overflow-hidden"
-            style={{
-              left: 0,
-              top: 27,
-              width: "100%",
-              padding: 10,
-              backgroundColor: "rgba(255,255,255,0.8)",
-              border: "1px solid #D4E8D8",
-              borderRadius: 12,
-            }}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ width: 38, height: 38, backgroundColor: "#1C1A14" }}
-              >
-                OE
-              </div>
-              <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">
-                {TESTIMONIALS[0].quote}
-              </p>
-            </div>
-            <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
-              <span className="text-xs font-medium text-ink">{TESTIMONIALS[0].name}</span>
-              <Stars count={TESTIMONIALS[0].stars} />
-            </div>
+        <div style={{ maxWidth: 560 }}>
+          {/* illustration */}
+          <div className="mt-8 flex justify-center">
+            <img src="/sign_illustration.svg" alt="" aria-hidden="true" className="w-full max-w-[380px]" />
           </div>
 
-          {/* card 2 — NY, Nam Y. */}
-          <div
-            className="absolute z-10 overflow-hidden"
-            style={{
-              left: 75,
-              top: 115,
-              width: "100%",
-              padding: 10,
-              backgroundColor: "rgba(255,255,255,0.8)",
-              border: "1px solid #D4E8D8",
-              borderRadius: 12,
-            }}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ width: 38, height: 38, backgroundColor: "#C4571A" }}
-              >
-                NY
-              </div>
-              <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">
-                {TESTIMONIALS[1].quote}
-              </p>
-            </div>
-            <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
-              <span className="text-xs font-medium text-ink">{TESTIMONIALS[1].name}</span>
-              <Stars count={TESTIMONIALS[1].stars} />
-            </div>
+          {/* tagline */}
+          <div className="mt-4">
+            <h2 className="font-display text-4xl font-bold leading-tight text-ink xl:text-[2.6rem]">
+              Your skills are{" "}
+              <span className="italic text-sage">worth more</span>{" "}
+              than money.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              Mutual is a no-money skill exchange. List something you do well,
+              ask for something you need help with — we&apos;ll match you with
+              neighbours who fit.
+            </p>
           </div>
 
-          {/* bottom rule */}
-          <div
-            className="absolute left-0 right-0"
-            style={{ top: 249, height: 1, backgroundColor: "#D4E8D8" }}
-          />
+          {/* testimonials */}
+          <div className="mt-8 flex flex-col gap-4">
+            {/* card 1 */}
+            <div
+              style={{
+                marginLeft: 0,
+                width: "85%",
+                padding: 16,
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                boxShadow: "0 4px 16px rgba(28,26,20,0.10)",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                  style={{ width: 38, height: 38, backgroundColor: TESTIMONIALS[0].avatarColor }}
+                >
+                  {TESTIMONIALS[0].initials}
+                </div>
+                <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">{TESTIMONIALS[0].quote}</p>
+              </div>
+              <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
+                <span className="text-xs font-medium text-ink">{TESTIMONIALS[0].name}</span>
+                <Stars count={TESTIMONIALS[0].stars} />
+              </div>
+            </div>
+
+            {/* card 2 */}
+            <div
+              style={{
+                marginLeft: 40,
+                width: "85%",
+                padding: 16,
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                boxShadow: "0 4px 16px rgba(28,26,20,0.10)",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                  style={{ width: 38, height: 38, backgroundColor: TESTIMONIALS[1].avatarColor }}
+                >
+                  {TESTIMONIALS[1].initials}
+                </div>
+                <p className="flex-1 text-[13px] leading-relaxed text-ink-soft">{TESTIMONIALS[1].quote}</p>
+              </div>
+              <div className="mt-2 flex items-center justify-between" style={{ paddingLeft: 50 }}>
+                <span className="text-xs font-medium text-ink">{TESTIMONIALS[1].name}</span>
+                <Stars count={TESTIMONIALS[1].stars} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
