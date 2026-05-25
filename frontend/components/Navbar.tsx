@@ -166,7 +166,7 @@ export default function Navbar() {
             ) : (
               /* Desktop: Join Mutual */
               <Link
-                href="/auth"
+                href="/auth?tab=register"
                 className="hidden rounded-full px-4 py-1.5 text-sm font-medium text-cream transition-opacity hover:opacity-90 md:block"
                 style={{ backgroundColor: "#1C1A14" }}
               >
@@ -184,7 +184,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <Link
-                href="/auth"
+                href="/auth?tab=register"
                 className="rounded-full px-4 py-1.5 text-sm font-medium text-cream transition-opacity hover:opacity-90 md:hidden"
                 style={{ backgroundColor: "#1C1A14" }}
               >
@@ -250,14 +250,6 @@ export default function Navbar() {
                 >
                   Chats
                 </Link>
-                <Link
-                  href="/profile"
-                  onClick={closeMenu}
-                  className="hover:bg-[#F5F1E6] transition-colors block"
-                  style={menuItemBase}
-                >
-                  My profile
-                </Link>
                 <button
                   onClick={() => { logout(); setUser(null); closeMenu(); router.push("/browse"); }}
                   className="hover:bg-[#FAEDE4] transition-colors"
@@ -268,7 +260,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/auth"
+                href="/auth?tab=register"
                 onClick={closeMenu}
                 className="hover:opacity-90 transition-opacity block"
                 style={{ ...menuItemBase, color: "#3D6B4F", backgroundColor: "#EAF0EB" }}

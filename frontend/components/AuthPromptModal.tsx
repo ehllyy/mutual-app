@@ -49,7 +49,7 @@ export default function AuthPromptModal({
 
         {/* CTA button */}
         <Link
-          href="/auth"
+          href="/auth?tab=register"
           className="mt-6 flex w-full items-center justify-center font-semibold text-white transition-opacity hover:opacity-90"
           style={{
             marginTop: 24,
@@ -66,7 +66,7 @@ export default function AuthPromptModal({
         {/* Sign in link */}
         <p className="mt-4 text-center text-sm">
           <Link
-            href="/auth"
+            href="/auth?tab=signin"
             className="font-medium transition-opacity hover:opacity-80"
             style={{ color: "#3D6B4F" }}
             onClick={onClose}

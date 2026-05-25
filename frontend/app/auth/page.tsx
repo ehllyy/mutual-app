@@ -78,7 +78,10 @@ function inputCls(value: string, extra = "") {
 
 function AuthContent() {
   const router = useRouter();
-  const [tab, setTab] = useState<"create" | "signin">("create");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<"create" | "signin">(
+    searchParams.get("tab") === "signin" ? "signin" : "create"
+  );
 
   /* create-account state */
   const [firstName, setFirstName] = useState("");
@@ -140,8 +143,6 @@ function AuthContent() {
     setErrors(e);
     return Object.keys(e).length === 0;
   }
-
-  const searchParams = useSearchParams();
 
   function handleCreate(ev: React.FormEvent) {
     ev.preventDefault();
