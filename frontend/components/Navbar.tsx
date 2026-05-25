@@ -13,15 +13,14 @@ const NAV_LINKS = [
 ];
 
 const menuItemBase: React.CSSProperties = {
-  height: 56,
-  display: "flex",
-  alignItems: "center",
-  paddingLeft: 20,
-  fontSize: 15,
-  color: "#1C1A14",
-  borderTop: "1px solid rgba(28,26,20,0.07)",
+  display: "block",
   width: "100%",
+  padding: "12px 16px",
+  fontSize: 14,
+  color: "#1C1A14",
+  borderBottom: "1px solid rgba(28,26,20,0.07)",
   textAlign: "left" as const,
+  background: "transparent",
 };
 
 export default function Navbar() {
@@ -74,7 +73,7 @@ export default function Navbar() {
   return (
     <>
     <header className="sticky top-0 z-50 w-full border-b border-cream-dark bg-cream/95 backdrop-blur">
-      <div ref={menuRef}>
+      <div ref={menuRef} className="relative">
 
         {/* ── TOP BAR ───────────────────────────────────────── */}
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -210,7 +209,17 @@ export default function Navbar() {
         {menuOpen && (
           <div
             className="md:hidden"
-            style={{ backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(28,26,20,0.10)" }}
+            style={{
+              position: "absolute",
+              top: "64px",
+              right: "16px",
+              width: 200,
+              backgroundColor: "#fff",
+              borderRadius: 8,
+              boxShadow: "0 4px 20px rgba(28,26,20,0.15)",
+              zIndex: 60,
+              overflow: "hidden",
+            }}
           >
             {/* Browse */}
             <Link
