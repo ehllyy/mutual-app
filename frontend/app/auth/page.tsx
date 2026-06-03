@@ -155,7 +155,8 @@ function AuthContent() {
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`;
       await registerUser(fullName, email.trim(), password);
-      login(fullName, email.trim(), neighbourhood.trim());
+      localStorage.setItem("mutual_neighbourhood", neighbourhood.trim());
+      login(`${firstName.trim()} ${lastName.trim()}`, email.trim());
       router.push("/browse");
     } catch {
       setApiError("Registration failed. Please try again.");

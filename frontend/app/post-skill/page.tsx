@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftRight, ArrowUpDown, Send, ChevronLeft } from "lucide-react";
-import { getUser } from "@/lib/auth";
 
 /* ─── data ───────────────────────────────────────────────────────── */
 
@@ -53,10 +52,12 @@ export default function PostSkillPage() {
     setLoading(true);
     setApiError("");
     try {
-      const user = getUser();
       const token = typeof window !== "undefined"
         ? (localStorage.getItem("mutual_token") ?? localStorage.getItem("token"))
         : null;
+      const location = typeof window !== "undefined"
+        ? (localStorage.getItem("mutual_neighbourhood") || "")
+        : "";
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/skills`,
         {
@@ -69,7 +70,7 @@ export default function PostSkillPage() {
             title,
             description,
             category,
-            location: user?.neighbourhood ?? "",
+            location,
             needsInReturn: returnSkill,
           }),
         }

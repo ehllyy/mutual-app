@@ -21,7 +21,11 @@ export function getUser(): AuthUser | null {
   const raw = localStorage.getItem(KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as AuthUser;
+    const user = JSON.parse(raw) as AuthUser;
+    if (!user.neighbourhood) {
+      user.neighbourhood = localStorage.getItem("mutual_neighbourhood") ?? "";
+    }
+    return user;
   } catch {
     return null;
   }
