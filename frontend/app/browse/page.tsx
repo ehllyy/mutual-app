@@ -29,18 +29,6 @@ const CATEGORY_STYLES: Record<string, { bg: string; color: string }> = {
   "Music & Dance":  { bg: "#F0EAF5", color: "#7A47A8" },
 };
 
-interface SkillListing {
-  id: number;
-  name: string;
-  initials: string;
-  location: string;
-  offers: string;
-  needs: string;
-  category: string;
-  avatarColor: string;
-  availability: string;
-}
-
 interface ApiSkill {
   id: number;
   title: string;
@@ -65,122 +53,6 @@ function toAvatarColor(name: string) {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
-function mapApiSkill(s: ApiSkill): SkillListing {
-  return {
-    id: s.id,
-    name: s.username ?? "Unknown",
-    initials: toInitials(s.username ?? "?"),
-    location: s.location ?? "",
-    offers: s.title,
-    needs: s.needsInReturn ?? "",
-    category: s.category ?? "Other",
-    avatarColor: toAvatarColor(s.username ?? ""),
-    availability: "",
-  };
-}
-
-const FALLBACK_LISTINGS: SkillListing[] = [
-  {
-    id: 1,
-    name: "Emmanuel Amoah",
-    initials: "EA",
-    location: "East Legon, Accra",
-    offers: "UI/UX Design (Figma & prototyping)",
-    needs: "West African cooking lessons",
-    category: "Creative & Arts",
-    avatarColor: "#3D6B4F",
-    availability: "Weekday evenings",
-  },
-  {
-    id: 2,
-    name: "Abena Mensah",
-    initials: "AM",
-    location: "Labone, Accra",
-    offers: "Hair braiding & natural hair styling",
-    needs: "Python programming basics",
-    category: "Beauty & Care",
-    avatarColor: "#9B3E7A",
-    availability: "Weekends",
-  },
-  {
-    id: 3,
-    name: "Kofi Asante",
-    initials: "KA",
-    location: "Santasi, Kumasi",
-    offers: "Guitar & Afrobeats music lessons",
-    needs: "Interior design consultation",
-    category: "Music & Dance",
-    avatarColor: "#7A47A8",
-    availability: "Saturday mornings",
-  },
-  {
-    id: 4,
-    name: "Naana Okai",
-    initials: "NO",
-    location: "Tema, Greater Accra",
-    offers: "Jollof rice & traditional Ghanaian cooking",
-    needs: "Yoga & mindfulness coaching",
-    category: "Food & Cooking",
-    avatarColor: "#C4763A",
-    availability: "Weekends",
-  },
-  {
-    id: 5,
-    name: "Kweku Eshun",
-    initials: "KE",
-    location: "Suame, Kumasi",
-    offers: "Plumbing & basic electrical repairs",
-    needs: "WASSCE Mathematics tutoring",
-    category: "Home & Trade",
-    avatarColor: "#8B7040",
-    availability: "Weekday mornings",
-  },
-  {
-    id: 6,
-    name: "Zainab Alidu",
-    initials: "ZA",
-    location: "Tamale, Northern Region",
-    offers: "French language lessons (beginners)",
-    needs: "React & web development lessons",
-    category: "Education",
-    avatarColor: "#2D7D6F",
-    availability: "Evenings",
-  },
-  {
-    id: 7,
-    name: "Naa Ofori",
-    initials: "NO",
-    location: "Cantonments, Accra",
-    offers: "Photography & Lightroom editing",
-    needs: "Personal training & fitness coaching",
-    category: "Creative & Arts",
-    avatarColor: "#6B5E3F",
-    availability: "Flexible",
-  },
-  {
-    id: 8,
-    name: "Ama Owusu",
-    initials: "AO",
-    location: "Adum, Kumasi",
-    offers: "Personal training & HIIT workouts",
-    needs: "Graphic design for small business",
-    category: "Fitness & Sport",
-    avatarColor: "#B05E9A",
-    availability: "Early mornings",
-  },
-  {
-    id: 9,
-    name: "Sena Attipoe",
-    initials: "SA",
-    location: "Ho, Volta Region",
-    offers: "React & Next.js development",
-    needs: "Ewe & Twi language lessons",
-    category: "Tech",
-    avatarColor: "#C48A2A",
-    availability: "Weekends",
-  },
-];
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const MY_SKILLS = ["UI/UX Design (Figma)", "Wireframing", "User Research"];
@@ -188,12 +60,12 @@ const MY_SKILLS = ["UI/UX Design (Figma)", "Wireframing", "User Research"];
 export default function BrowsePage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All Skills");
-  const [proposalTarget, setProposalTarget] = useState<SkillListing | null>(null);
+  const [proposalTarget, setProposalTarget] = useState<ApiSkill | null>(null);
   const [proposalSkill, setProposalSkill] = useState("");
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(false);
-  const [listings, setListings] = useState<SkillListing[]>(FALLBACK_LISTINGS);
+  const [listings, setListings] = useState<ApiSkill[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -204,9 +76,7 @@ export default function BrowsePage() {
       })
       .then((data: ApiSkill[]) => {
         console.log("API response:", data);
-        if (Array.isArray(data) && data.length > 0) {
-          setListings(data.map(mapApiSkill));
-        }
+        setListings(Array.isArray(data) ? data : []);
       })
       .catch((error) => {
         console.log("Fetch error:", error);
@@ -220,14 +90,14 @@ export default function BrowsePage() {
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
-      s.offers.toLowerCase().includes(q) ||
-      s.needs.toLowerCase().includes(q) ||
-      s.name.toLowerCase().includes(q) ||
+      s.title.toLowerCase().includes(q) ||
+      s.needsInReturn.toLowerCase().includes(q) ||
+      s.username.toLowerCase().includes(q) ||
       s.location.toLowerCase().includes(q);
     return matchCat && matchSearch;
   });
 
-  function openModal(listing: SkillListing) {
+  function openModal(listing: ApiSkill) {
     if (!isLoggedIn()) {
       setAuthPrompt(true);
       return;
@@ -327,13 +197,13 @@ export default function BrowsePage() {
                   <div className="flex items-center gap-3 bg-white px-4 pb-3 pt-4">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                      style={{ backgroundColor: listing.avatarColor }}
+                      style={{ backgroundColor: toAvatarColor(listing.username ?? "") }}
                     >
-                      {listing.initials}
+                      {toInitials(listing.username ?? "?")}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-ink">
-                        {listing.name}
+                        {listing.username}
                       </p>
                       <div className="flex items-center gap-1 text-xs text-ink-muted">
                         <MapPin className="h-3 w-3 shrink-0" />
@@ -352,7 +222,7 @@ export default function BrowsePage() {
                         OFFERS
                       </span>
                       <span className="truncate text-sm text-ink-soft">
-                        {listing.offers}
+                        {listing.title}
                       </span>
                     </div>
                     <div
@@ -363,7 +233,7 @@ export default function BrowsePage() {
                         NEEDS
                       </span>
                       <span className="truncate text-sm text-ink-soft">
-                        {listing.needs}
+                        {listing.needsInReturn}
                       </span>
                     </div>
                   </div>
@@ -431,7 +301,7 @@ export default function BrowsePage() {
                 </div>
                 <h3 className="font-display text-xl font-bold text-ink">Proposal sent!</h3>
                 <p className="mt-1.5 text-sm text-ink-muted">
-                  {proposalTarget.name} will be notified of your swap proposal.
+                  {proposalTarget.username} will be notified of your swap proposal.
                 </p>
                 <button
                   onClick={closeModal}
@@ -450,7 +320,7 @@ export default function BrowsePage() {
                       Propose a Swap
                     </h3>
                     <p className="mt-0.5 text-sm" style={{ color: "#8A887E" }}>
-                      with {proposalTarget.name}
+                      with {proposalTarget.username}
                     </p>
                   </div>
                   <button
@@ -483,7 +353,7 @@ export default function BrowsePage() {
                     >
                       THEY GIVE
                     </span>
-                    <span className="text-sm text-ink-soft">{proposalTarget.offers}</span>
+                    <span className="text-sm text-ink-soft">{proposalTarget.title}</span>
                   </div>
                 </div>
 
