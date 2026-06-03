@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftRight, ArrowUpDown, Send, ChevronLeft } from "lucide-react";
+import { getUser } from "@/lib/auth";
 
 /* ─── data ───────────────────────────────────────────────────────── */
 
@@ -31,6 +32,8 @@ export default function PostSkillPage() {
   const [returnSkill, setReturnSkill] = useState("");
   const [errors,      setErrors]      = useState<Record<string, string>>({});
   const [success,     setSuccess]     = useState(false);
+  const [loading,     setLoading]     = useState(false);
+  const [apiError,    setApiError]    = useState("");
 
   function clearError(key: string) {
     if (errors[key]) setErrors((e) => ({ ...e, [key]: "" }));
@@ -45,8 +48,38 @@ export default function PostSkillPage() {
     return Object.keys(e).length === 0;
   }
 
-  function handlePost() {
-    if (validate()) setSuccess(true);
+  async function handlePost() {
+    if (!validate()) return;
+    setLoading(true);
+    setApiError("");
+    try {
+      const user = getUser();
+      const token = typeof window !== "undefined" ? localStorage.getItem("mutual_token") : null;
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/skills`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            category,
+            location: user?.email ?? "",
+            needsInReturn: returnSkill,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("Post failed");
+      setSuccess(true);
+      setTimeout(() => router.push("/browse"), 1000);
+    } catch {
+      setApiError("Failed to post your listing. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   /* shared input style — cream bg against the white card */
@@ -232,6 +265,10 @@ export default function PostSkillPage() {
         </div>
 
         {/* ── CANCEL + POST ──────────────────────────────────── */}
+        {apiError && (
+          <p className="mt-3 text-center text-sm text-red-500">{apiError}</p>
+        )}
+
         <div className="mt-4 flex gap-3 pb-10">
           <button
             type="button"
@@ -243,10 +280,17 @@ export default function PostSkillPage() {
           <button
             type="button"
             onClick={handlePost}
-            className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+            disabled={loading}
+            className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Send className="h-4 w-4" />
-            Post listing
+            {loading ? (
+              "Posting…"
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Post listing
+              </>
+            )}
           </button>
         </div>
       </div>
