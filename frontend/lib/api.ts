@@ -18,7 +18,7 @@ export async function loginUser(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) throw new Error("Login failed");
-  return res.json();
+  return { ok: true };
 }
 
 // SKILLS

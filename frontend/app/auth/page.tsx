@@ -170,11 +170,10 @@ function AuthContent() {
     setLoading(true);
     setApiError("");
     try {
-      const data = await loginUser(siEmail.trim(), siPassword);
-      if (data.token) localStorage.setItem("mutual_token", data.token);
-      const name = data.name ?? siEmail.split("@")[0].replace(/[._]/g, " ");
-      login(name, siEmail.trim());
-      router.push("/browse");
+      await loginUser(siEmail.trim(), siPassword);
+      login(siEmail.trim(), siEmail.trim());
+      window.dispatchEvent(new Event("mutual-auth-change"));
+      setTimeout(() => router.push("/browse"), 150);
     } catch {
       setApiError("Invalid email or password.");
     } finally {
