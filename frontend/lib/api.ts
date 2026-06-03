@@ -8,7 +8,7 @@ export async function registerUser(username: string, email: string, password: st
     body: JSON.stringify({ username, email, password }),
   });
   if (!res.ok) throw new Error("Registration failed");
-  return res.json();
+  return { ok: true };
 }
 
 export async function loginUser(email: string, password: string) {
