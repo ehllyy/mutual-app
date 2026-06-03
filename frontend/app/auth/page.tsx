@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftRight, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { login } from "@/lib/auth";
+import { registerUser, loginUser } from "@/lib/api";
 
 /* ─── constants ─────────────────────────────────────────────────── */
 
@@ -100,6 +101,8 @@ function AuthContent() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   /* ─ helpers ─ */
 
@@ -144,22 +147,38 @@ function AuthContent() {
     return Object.keys(e).length === 0;
   }
 
-  function handleCreate(ev: React.FormEvent) {
+  async function handleCreate(ev: React.SyntheticEvent) {
     ev.preventDefault();
-    if (validateCreate()) {
+    if (!validateCreate()) return;
+    setLoading(true);
+    setApiError("");
+    try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`;
+      await registerUser(fullName, email.trim(), password);
+      localStorage.setItem("mutual_neighbourhood", neighbourhood.trim());
       login(`${firstName.trim()} ${lastName.trim()}`, email.trim());
-      window.dispatchEvent(new Event("mutual-auth-change"));
-      setTimeout(() => router.push("/browse"), 100);
+      router.push("/browse");
+    } catch {
+      setApiError("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
-  function handleSignIn(ev: React.FormEvent) {
+  async function handleSignIn(ev: React.SyntheticEvent) {
     ev.preventDefault();
-    if (validateSignIn()) {
-      const nameFallback = siEmail.split("@")[0].replace(/[._]/g, " ");
-      login(nameFallback, siEmail.trim());
+    if (!validateSignIn()) return;
+    setLoading(true);
+    setApiError("");
+    try {
+      await loginUser(siEmail.trim(), siPassword);
+      login(siEmail.trim(), siEmail.trim());
       window.dispatchEvent(new Event("mutual-auth-change"));
-      setTimeout(() => router.push("/browse"), 100);
+      setTimeout(() => router.push("/browse"), 150);
+    } catch {
+      setApiError("Invalid email or password.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -272,7 +291,7 @@ function AuthContent() {
           {/* tab switcher */}
           <div className="mb-6 flex rounded-full bg-cream-dark p-1">
             <button
-              onClick={() => { setTab("signin"); setErrors({}); }}
+              onClick={() => { setTab("signin"); setErrors({}); setApiError(""); }}
               className={`flex-1 rounded-full py-2 text-sm font-medium transition-colors ${
                 tab === "signin"
                   ? "bg-ink text-cream shadow-sm"
@@ -282,7 +301,7 @@ function AuthContent() {
               Sign in
             </button>
             <button
-              onClick={() => { setTab("create"); setErrors({}); }}
+              onClick={() => { setTab("create"); setErrors({}); setApiError(""); }}
               className={`flex-1 rounded-full py-2 text-sm font-medium transition-colors ${
                 tab === "create"
                   ? "bg-ink text-cream shadow-sm"
@@ -414,9 +433,14 @@ function AuthContent() {
                 )}
               </div>
 
+              {apiError && (
+                <p className="text-center text-sm text-red-500">{apiError}</p>
+              )}
+
               <button
                 type="submit"
                 disabled={
+                  loading ||
                   !firstName.trim() ||
                   !lastName.trim() ||
                   !email.trim() ||
@@ -426,8 +450,8 @@ function AuthContent() {
                 }
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Create my account
-                <ArrowRight className="h-4 w-4" />
+                {loading ? "Creating account…" : "Create my account"}
+                {!loading && <ArrowRight className="h-4 w-4" />}
               </button>
             </form>
           )}
@@ -482,14 +506,18 @@ function AuthContent() {
                 Remember me
               </label>
 
+              {apiError && (
+                <p className="text-center text-sm text-red-500">{apiError}</p>
+              )}
+
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={!siEmail.trim() || !siPassword}
+                  disabled={loading || !siEmail.trim() || !siPassword}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-3 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Sign in
-                  <ArrowRight className="h-4 w-4" />
+                  {loading ? "Signing in…" : "Sign in"}
+                  {!loading && <ArrowRight className="h-4 w-4" />}
                 </button>
               </div>
             </form>
