@@ -14,6 +14,7 @@ public class Skill {
     private String category;
     private String location;
     private String needsInReturn;
+    private String username;
 
     public Skill() {}
 
@@ -60,4 +61,8 @@ public class Skill {
     public void setNeedsInReturn(String needsInReturn) {
         this.needsInReturn = needsInReturn;
     }
+
+    public String getUsername() {return username;}
+
+    public void setUsername(String username) {this.username = username;}
 }
