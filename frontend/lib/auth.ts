@@ -1,14 +1,14 @@
 const KEY = "mutual_user";
 
-export type AuthUser = { name: string; email: string };
+export type AuthUser = { name: string; email: string; neighbourhood?: string };
 
 export function isLoggedIn(): boolean {
   if (typeof window === "undefined") return false;
   return localStorage.getItem(KEY) !== null;
 }
 
-export function login(name: string, email: string): void {
-  localStorage.setItem(KEY, JSON.stringify({ name, email }));
+export function login(name: string, email: string, neighbourhood = ""): void {
+  localStorage.setItem(KEY, JSON.stringify({ name, email, neighbourhood }));
   window.dispatchEvent(new Event("mutual-auth-change"));
 }
 

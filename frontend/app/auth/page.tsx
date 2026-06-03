@@ -155,7 +155,7 @@ function AuthContent() {
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`;
       await registerUser(fullName, email.trim(), password);
-      login(fullName, email.trim());
+      login(fullName, email.trim(), neighbourhood.trim());
       router.push("/browse");
     } catch {
       setApiError("Registration failed. Please try again.");

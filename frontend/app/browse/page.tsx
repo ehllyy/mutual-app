@@ -203,12 +203,13 @@ export default function BrowsePage() {
         return res.json();
       })
       .then((data: ApiSkill[]) => {
+        console.log("API response:", data);
         if (Array.isArray(data) && data.length > 0) {
           setListings(data.map(mapApiSkill));
         }
       })
-      .catch(() => {
-        // keep fallback data already in state
+      .catch((error) => {
+        console.log("Fetch error:", error);
       })
       .finally(() => setLoading(false));
   }, []);

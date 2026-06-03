@@ -54,7 +54,9 @@ export default function PostSkillPage() {
     setApiError("");
     try {
       const user = getUser();
-      const token = typeof window !== "undefined" ? localStorage.getItem("mutual_token") : null;
+      const token = typeof window !== "undefined"
+        ? (localStorage.getItem("mutual_token") ?? localStorage.getItem("token"))
+        : null;
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/skills`,
         {
@@ -67,11 +69,13 @@ export default function PostSkillPage() {
             title,
             description,
             category,
-            location: user?.email ?? "",
+            location: user?.neighbourhood ?? "",
             needsInReturn: returnSkill,
           }),
         }
       );
+      const responseText = await res.text();
+      console.log("Post skill response:", res.status, responseText);
       if (!res.ok) throw new Error("Post failed");
       setSuccess(true);
       setTimeout(() => router.push("/browse"), 1000);
