@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, MapPin, ArrowRight, X, Send } from "lucide-react";
 import { isLoggedIn } from "@/lib/auth";
@@ -41,7 +41,45 @@ interface SkillListing {
   availability: string;
 }
 
-const LISTINGS: SkillListing[] = [
+interface ApiSkill {
+  id: number;
+  title: string;
+  needsInReturn: string;
+  category: string;
+  location: string;
+  username: string;
+  description?: string;
+}
+
+const AVATAR_COLORS = [
+  "#3D6B4F", "#9B3E7A", "#7A47A8", "#C4763A",
+  "#8B7040", "#2D7D6F", "#6B5E3F", "#B05E9A", "#C48A2A",
+];
+
+function toInitials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function toAvatarColor(name: string) {
+  const hash = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+function mapApiSkill(s: ApiSkill): SkillListing {
+  return {
+    id: s.id,
+    name: s.username ?? "Unknown",
+    initials: toInitials(s.username ?? "?"),
+    location: s.location ?? "",
+    offers: s.title,
+    needs: s.needsInReturn ?? "",
+    category: s.category ?? "Other",
+    avatarColor: toAvatarColor(s.username ?? ""),
+    availability: "",
+  };
+}
+
+const FALLBACK_LISTINGS: SkillListing[] = [
   {
     id: 1,
     name: "Emmanuel Amoah",
@@ -143,6 +181,8 @@ const LISTINGS: SkillListing[] = [
   },
 ];
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 const MY_SKILLS = ["UI/UX Design (Figma)", "Wireframing", "User Research"];
 
 export default function BrowsePage() {
@@ -153,8 +193,27 @@ export default function BrowsePage() {
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(false);
+  const [listings, setListings] = useState<SkillListing[]>(FALLBACK_LISTINGS);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = LISTINGS.filter((s) => {
+  useEffect(() => {
+    fetch(`${BASE_URL}/skills`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
+      .then((data: ApiSkill[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setListings(data.map(mapApiSkill));
+        }
+      })
+      .catch(() => {
+        // keep fallback data already in state
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = listings.filter((s) => {
     const matchCat =
       activeCategory === "All Skills" || s.category === activeCategory;
     const q = search.toLowerCase();
@@ -238,7 +297,11 @@ export default function BrowsePage() {
 
       {/* Card grid */}
       <div className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <p className="text-sm text-ink-muted">Loading skills…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24">
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-cream-dark">
               <Search className="h-6 w-6 text-ink-muted" />
