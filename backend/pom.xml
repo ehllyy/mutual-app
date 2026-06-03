@@ -32,12 +32,27 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+<<<<<<< HEAD
+=======
+
+>>>>>>> b384b4f0b15184bd0d3dcc972c82c3f55ecbcca0
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+<<<<<<< HEAD
             </plugin>
         </plugins>
     </build>
 </project>
+=======
+                <configuration>
+                    <classifier>exec</classifier> 
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+>>>>>>> b384b4f0b15184bd0d3dcc972c82c3f55ecbcca0
