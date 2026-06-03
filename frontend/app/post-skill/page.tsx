@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftRight, ArrowUpDown, Send, ChevronLeft } from "lucide-react";
+import { getUser } from "@/lib/auth";
 
 /* ─── data ───────────────────────────────────────────────────────── */
 
@@ -52,6 +53,7 @@ export default function PostSkillPage() {
     setLoading(true);
     setApiError("");
     try {
+      const user = getUser();
       const token = typeof window !== "undefined"
         ? (localStorage.getItem("mutual_token") ?? localStorage.getItem("token"))
         : null;
@@ -72,6 +74,7 @@ export default function PostSkillPage() {
             category,
             location,
             needsInReturn: returnSkill,
+            username: user?.name || "",
           }),
         }
       );
