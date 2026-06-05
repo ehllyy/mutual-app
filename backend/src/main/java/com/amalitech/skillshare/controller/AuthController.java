@@ -4,7 +4,6 @@ import com.amalitech.skillshare.model.User;
 import com.amalitech.skillshare.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,5 +21,18 @@ public class AuthController {
         return userRepository.save(user);
     }
 
-    
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String password = request.get("password");
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null || !user.getPassword().equals(password)) {
+            return Map.of("message", "Invalid credentials");
+        }
+        return Map.of(
+            "message", "Login Successful",
+            "username", user.getUsername(),
+            "email", user.getEmail()
+        );
+    }
 }
