@@ -4,7 +4,6 @@ import com.amalitech.skillshare.model.User;
 import com.amalitech.skillshare.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -34,7 +33,7 @@ public class AuthController {
             "message", "Login Successful",
             "username", user.getUsername(),
             "email", user.getEmail(),
-            "location", user.getLocation() != null ? user.getLocation() : ""
+            "location", user.getLocation()
         );
     }
 }
