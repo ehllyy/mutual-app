@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, Pencil, X, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin, X, Plus } from "lucide-react";
+import { getUser } from "@/lib/auth";
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 /* ─── pill colours ──────────────────────────────────────────────── */
 
@@ -19,15 +22,23 @@ function pillStyle(skill: string) {
   return PILL_COLORS[hash % PILL_COLORS.length];
 }
 
+const AVATAR_COLORS = [
+  "#3D6B4F", "#9B3E7A", "#7A47A8", "#C4763A",
+  "#8B7040", "#2D7D6F", "#6B5E3F", "#B05E9A", "#C48A2A",
+];
+
+function toAvatarColor(name: string) {
+  const hash = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+function toInitials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+}
+
 /* ─── pill component ─────────────────────────────────────────────── */
 
-function Pill({
-  skill,
-  onRemove,
-}: {
-  skill: string;
-  onRemove?: () => void;
-}) {
+function Pill({ skill, onRemove }: { skill: string; onRemove?: () => void }) {
   const s = pillStyle(skill);
   return (
     <span
@@ -36,10 +47,7 @@ function Pill({
     >
       {skill}
       {onRemove && (
-        <button
-          onClick={onRemove}
-          className="ml-0.5 opacity-60 hover:opacity-100 transition-opacity"
-        >
+        <button onClick={onRemove} className="ml-0.5 opacity-60 transition-opacity hover:opacity-100">
           <X className="h-3 w-3" />
         </button>
       )}
@@ -50,43 +58,20 @@ function Pill({
 /* ─── section header ─────────────────────────────────────────────── */
 
 function SectionHeader({
-  title,
-  editing,
-  onEdit,
-  onSave,
-  onCancel,
+  title, editing, onEdit, onSave, onCancel,
 }: {
-  title: string;
-  editing: boolean;
-  onEdit: () => void;
-  onSave: () => void;
-  onCancel: () => void;
+  title: string; editing: boolean; onEdit: () => void; onSave: () => void; onCancel: () => void;
 }) {
   return (
     <div className="mb-4 flex items-center justify-between">
-      <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-        {title}
-      </p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">{title}</p>
       {editing ? (
         <div className="flex gap-3 text-xs font-medium">
-          <button
-            onClick={onSave}
-            className="text-sage hover:text-sage/80 transition-colors"
-          >
-            Save
-          </button>
-          <button
-            onClick={onCancel}
-            className="text-ink-muted hover:text-ink-soft transition-colors"
-          >
-            Cancel
-          </button>
+          <button onClick={onSave} className="text-sage transition-colors hover:text-sage/80">Save</button>
+          <button onClick={onCancel} className="text-ink-muted transition-colors hover:text-ink-soft">Cancel</button>
         </div>
       ) : (
-        <button
-          onClick={onEdit}
-          className="text-xs font-medium text-ink-muted hover:text-ink-soft transition-colors"
-        >
+        <button onClick={onEdit} className="text-xs font-medium text-ink-muted transition-colors hover:text-ink-soft">
           Edit
         </button>
       )}
@@ -94,88 +79,97 @@ function SectionHeader({
   );
 }
 
-/* ─── static data ────────────────────────────────────────────────── */
-
-const DEFAULT_BIO =
-  "I'm a UI/UX designer based in East Legon, Accra. I've been working in product design for 3 years — mostly on mobile apps and SaaS dashboards. Outside of work I play acoustic guitar and I'm learning West African cooking. I love meeting neighbours through Mutual because every swap teaches me something new. Happy to do sessions online or in person locally.";
-
-const DEFAULT_OFFER = ["Design", "React", "B2 German"];
-const DEFAULT_NEED = ["Furniture repair", "French lessons", "Cooking lessons"];
+interface ApiSkill {
+  id: number;
+  title: string;
+  needsInReturn: string;
+  username: string;
+  location: string;
+  category: string;
+}
 
 /* ─── page ───────────────────────────────────────────────────────── */
 
 export default function ProfilePage() {
-  /* about */
-  const [bio, setBio] = useState(DEFAULT_BIO);
-  const [editingBio, setEditingBio] = useState(false);
-  const [bioDraft, setBioDraft] = useState(bio);
+  const [name, setName] = useState("");
+  const [neighbourhood, setNeighbourhood] = useState("");
 
-  /* skills offer */
-  const [offer, setOffer] = useState(DEFAULT_OFFER);
+  /* about */
+  const [bio, setBio] = useState("");
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioDraft, setBioDraft] = useState("");
+
+  /* skills from API */
+  const [offer, setOffer] = useState<string[]>([]);
+  const [need, setNeed] = useState<string[]>([]);
+
+  /* skills offer editing */
   const [editingOffer, setEditingOffer] = useState(false);
-  const [offerDraft, setOfferDraft] = useState([...DEFAULT_OFFER]);
+  const [offerDraft, setOfferDraft] = useState<string[]>([]);
   const [offerInput, setOfferInput] = useState("");
 
-  /* skills need */
-  const [need, setNeed] = useState(DEFAULT_NEED);
+  /* skills need editing */
   const [editingNeed, setEditingNeed] = useState(false);
-  const [needDraft, setNeedDraft] = useState([...DEFAULT_NEED]);
+  const [needDraft, setNeedDraft] = useState<string[]>([]);
   const [needInput, setNeedInput] = useState("");
 
+  useEffect(() => {
+    const user = getUser();
+    const savedName = user?.name ?? "";
+    const savedNeighbourhood =
+      user?.neighbourhood ||
+      (typeof window !== "undefined" ? localStorage.getItem("mutual_neighbourhood") ?? "" : "");
+    const savedBio =
+      typeof window !== "undefined" ? localStorage.getItem("mutual_about") ?? "" : "";
+
+    setName(savedName);
+    setNeighbourhood(savedNeighbourhood);
+    setBio(savedBio);
+    setBioDraft(savedBio);
+
+    if (savedName) {
+      fetch(`${BASE_URL}/skills`)
+        .then((res) => res.json())
+        .then((data: ApiSkill[]) => {
+          const mine = Array.isArray(data) ? data.filter((s) => s.username === savedName) : [];
+          const titles = mine.map((s) => s.title).filter(Boolean);
+          const needs = mine.map((s) => s.needsInReturn).filter(Boolean);
+          setOffer(titles);
+          setNeed(needs);
+          setOfferDraft(titles);
+          setNeedDraft(needs);
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   /* ─ about handlers ─ */
-  function startBioEdit() {
-    setBioDraft(bio);
-    setEditingBio(true);
-  }
+  function startBioEdit() { setBioDraft(bio); setEditingBio(true); }
   function saveBio() {
-    setBio(bioDraft.trim() || bio);
+    const updated = bioDraft.trim() || bio;
+    setBio(updated);
+    localStorage.setItem("mutual_about", updated);
     setEditingBio(false);
   }
-  function cancelBio() {
-    setEditingBio(false);
-  }
+  function cancelBio() { setEditingBio(false); }
 
   /* ─ offer handlers ─ */
-  function startOfferEdit() {
-    setOfferDraft([...offer]);
-    setOfferInput("");
-    setEditingOffer(true);
-  }
-  function saveOffer() {
-    setOffer([...offerDraft]);
-    setEditingOffer(false);
-  }
-  function cancelOffer() {
-    setEditingOffer(false);
-    setOfferInput("");
-  }
+  function startOfferEdit() { setOfferDraft([...offer]); setOfferInput(""); setEditingOffer(true); }
+  function saveOffer() { setOffer([...offerDraft]); setEditingOffer(false); }
+  function cancelOffer() { setEditingOffer(false); setOfferInput(""); }
   function addOffer() {
     const t = offerInput.trim();
-    if (t && !offerDraft.includes(t)) {
-      setOfferDraft((prev) => [...prev, t]);
-    }
+    if (t && !offerDraft.includes(t)) setOfferDraft((prev) => [...prev, t]);
     setOfferInput("");
   }
 
   /* ─ need handlers ─ */
-  function startNeedEdit() {
-    setNeedDraft([...need]);
-    setNeedInput("");
-    setEditingNeed(true);
-  }
-  function saveNeed() {
-    setNeed([...needDraft]);
-    setEditingNeed(false);
-  }
-  function cancelNeed() {
-    setEditingNeed(false);
-    setNeedInput("");
-  }
+  function startNeedEdit() { setNeedDraft([...need]); setNeedInput(""); setEditingNeed(true); }
+  function saveNeed() { setNeed([...needDraft]); setEditingNeed(false); }
+  function cancelNeed() { setEditingNeed(false); setNeedInput(""); }
   function addNeed() {
     const t = needInput.trim();
-    if (t && !needDraft.includes(t)) {
-      setNeedDraft((prev) => [...prev, t]);
-    }
+    if (t && !needDraft.includes(t)) setNeedDraft((prev) => [...prev, t]);
     setNeedInput("");
   }
 
@@ -186,37 +180,35 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-cream py-8">
       <div className="mx-auto max-w-[760px] space-y-4 px-4 sm:px-6">
 
-        {/* ── PROFILE HEADER CARD ───────────────────────────── */}
+        {/* ── PROFILE HEADER ─────────────────────────────────── */}
         <div className="overflow-hidden rounded-2xl border border-cream-dark bg-white shadow-sm">
-          {/* banner */}
           <div className="h-32 bg-gradient-to-br from-sage to-sage-mid" />
-
-          {/* content */}
           <div className="px-6 pb-6">
-            {/* avatar */}
             <div className="-mt-9 mb-1">
-              <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-4 border-white bg-[#4A78C4] text-lg font-semibold text-white shadow-sm">
-                EA
+              <div
+                className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-4 border-white text-lg font-semibold text-white shadow-sm"
+                style={{ backgroundColor: name ? toAvatarColor(name) : "#3D6B4F" }}
+              >
+                {name ? toInitials(name) : "?"}
               </div>
             </div>
-
-            {/* name row */}
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="font-display text-2xl font-bold text-ink">
-                  Emmanuel Amoah
+                  {name || "Your Name"}
                 </h1>
-                <div className="mt-1 flex items-center gap-1 text-sm text-ink-muted">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  East Legon, Accra
-                </div>
+                {neighbourhood && (
+                  <div className="mt-1 flex items-center gap-1 text-sm text-ink-muted">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    {neighbourhood}
+                  </div>
+                )}
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* ── ABOUT CARD ────────────────────────────────────── */}
+        {/* ── ABOUT ──────────────────────────────────────────── */}
         <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
           <SectionHeader
             title="About"
@@ -234,11 +226,13 @@ export default function ProfilePage() {
               className="w-full resize-none rounded-xl border border-cream-dark bg-cream px-4 py-3 text-sm leading-relaxed text-ink focus:outline-none focus:ring-2 focus:ring-sage/30"
             />
           ) : (
-            <p className="text-sm leading-relaxed text-ink-soft">{bio}</p>
+            <p className="text-sm leading-relaxed text-ink-soft">
+              {bio || "No about yet. Click Edit to add a bio."}
+            </p>
           )}
         </div>
 
-        {/* ── SKILLS GRID ───────────────────────────────────── */}
+        {/* ── SKILLS GRID ────────────────────────────────────── */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
           {/* Skills I Need */}
@@ -255,13 +249,12 @@ export default function ProfilePage() {
                 <Pill
                   key={skill + i}
                   skill={skill}
-                  onRemove={
-                    editingNeed
-                      ? () => setNeedDraft((prev) => prev.filter((_, idx) => idx !== i))
-                      : undefined
-                  }
+                  onRemove={editingNeed ? () => setNeedDraft((prev) => prev.filter((_, idx) => idx !== i)) : undefined}
                 />
               ))}
+              {!editingNeed && need.length === 0 && (
+                <p className="text-sm text-ink-muted">None listed yet.</p>
+              )}
             </div>
             {editingNeed && (
               <div className="mt-3 flex gap-2">
@@ -297,13 +290,12 @@ export default function ProfilePage() {
                 <Pill
                   key={skill + i}
                   skill={skill}
-                  onRemove={
-                    editingOffer
-                      ? () => setOfferDraft((prev) => prev.filter((_, idx) => idx !== i))
-                      : undefined
-                  }
+                  onRemove={editingOffer ? () => setOfferDraft((prev) => prev.filter((_, idx) => idx !== i)) : undefined}
                 />
               ))}
+              {!editingOffer && offer.length === 0 && (
+                <p className="text-sm text-ink-muted">None listed yet.</p>
+              )}
             </div>
             {editingOffer && (
               <div className="mt-3 flex gap-2">

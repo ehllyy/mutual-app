@@ -263,7 +263,7 @@ export default function BrowsePage() {
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
                       <Link
-                        href={`/users/${listing.id}`}
+                        href={`/users/${encodeURIComponent(listing.username)}`}
                         className="flex h-11 shrink-0 items-center justify-center px-4 text-sm font-medium text-ink-soft transition-colors hover:text-ink"
                         style={{
                           backgroundColor: "white",
