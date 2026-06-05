@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, X, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, X } from "lucide-react";
 import { getUser } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -91,6 +92,7 @@ interface ApiSkill {
 /* ─── page ───────────────────────────────────────────────────────── */
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [neighbourhood, setNeighbourhood] = useState("");
 
@@ -103,15 +105,6 @@ export default function ProfilePage() {
   const [offer, setOffer] = useState<string[]>([]);
   const [need, setNeed] = useState<string[]>([]);
 
-  /* skills offer editing */
-  const [editingOffer, setEditingOffer] = useState(false);
-  const [offerDraft, setOfferDraft] = useState<string[]>([]);
-  const [offerInput, setOfferInput] = useState("");
-
-  /* skills need editing */
-  const [editingNeed, setEditingNeed] = useState(false);
-  const [needDraft, setNeedDraft] = useState<string[]>([]);
-  const [needInput, setNeedInput] = useState("");
 
   useEffect(() => {
     const user = getUser();
@@ -136,8 +129,6 @@ export default function ProfilePage() {
           const needs = mine.map((s) => s.needsInReturn).filter(Boolean);
           setOffer(titles);
           setNeed(needs);
-          setOfferDraft(titles);
-          setNeedDraft(needs);
         })
         .catch(() => {});
     }
@@ -153,28 +144,6 @@ export default function ProfilePage() {
   }
   function cancelBio() { setEditingBio(false); }
 
-  /* ─ offer handlers ─ */
-  function startOfferEdit() { setOfferDraft([...offer]); setOfferInput(""); setEditingOffer(true); }
-  function saveOffer() { setOffer([...offerDraft]); setEditingOffer(false); }
-  function cancelOffer() { setEditingOffer(false); setOfferInput(""); }
-  function addOffer() {
-    const t = offerInput.trim();
-    if (t && !offerDraft.includes(t)) setOfferDraft((prev) => [...prev, t]);
-    setOfferInput("");
-  }
-
-  /* ─ need handlers ─ */
-  function startNeedEdit() { setNeedDraft([...need]); setNeedInput(""); setEditingNeed(true); }
-  function saveNeed() { setNeed([...needDraft]); setEditingNeed(false); }
-  function cancelNeed() { setEditingNeed(false); setNeedInput(""); }
-  function addNeed() {
-    const t = needInput.trim();
-    if (t && !needDraft.includes(t)) setNeedDraft((prev) => [...prev, t]);
-    setNeedInput("");
-  }
-
-  const addInputCls =
-    "flex-1 rounded-xl border border-cream-dark bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30";
 
   return (
     <div className="min-h-screen bg-cream py-8">
@@ -237,84 +206,44 @@ export default function ProfilePage() {
 
           {/* Skills I Need */}
           <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
-            <SectionHeader
-              title="Skills I Need"
-              editing={editingNeed}
-              onEdit={startNeedEdit}
-              onSave={saveNeed}
-              onCancel={cancelNeed}
-            />
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Skills I Need</p>
+              <button
+                onClick={() => router.push("/post-skill")}
+                className="text-xs font-medium text-ink-muted transition-colors hover:text-ink-soft"
+              >
+                Add skill
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {(editingNeed ? needDraft : need).map((skill, i) => (
-                <Pill
-                  key={skill + i}
-                  skill={skill}
-                  onRemove={editingNeed ? () => setNeedDraft((prev) => prev.filter((_, idx) => idx !== i)) : undefined}
-                />
+              {need.map((skill, i) => (
+                <Pill key={skill + i} skill={skill} />
               ))}
-              {!editingNeed && need.length === 0 && (
+              {need.length === 0 && (
                 <p className="text-sm text-ink-muted">None listed yet.</p>
               )}
             </div>
-            {editingNeed && (
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={needInput}
-                  onChange={(e) => setNeedInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addNeed()}
-                  placeholder="Add a skill..."
-                  className={addInputCls}
-                />
-                <button
-                  onClick={addNeed}
-                  className="flex items-center gap-1 rounded-xl border border-cream-dark px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Skills I Offer */}
           <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
-            <SectionHeader
-              title="Skills I Offer"
-              editing={editingOffer}
-              onEdit={startOfferEdit}
-              onSave={saveOffer}
-              onCancel={cancelOffer}
-            />
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Skills I Offer</p>
+              <button
+                onClick={() => router.push("/post-skill")}
+                className="text-xs font-medium text-ink-muted transition-colors hover:text-ink-soft"
+              >
+                Add skill
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {(editingOffer ? offerDraft : offer).map((skill, i) => (
-                <Pill
-                  key={skill + i}
-                  skill={skill}
-                  onRemove={editingOffer ? () => setOfferDraft((prev) => prev.filter((_, idx) => idx !== i)) : undefined}
-                />
+              {offer.map((skill, i) => (
+                <Pill key={skill + i} skill={skill} />
               ))}
-              {!editingOffer && offer.length === 0 && (
+              {offer.length === 0 && (
                 <p className="text-sm text-ink-muted">None listed yet.</p>
               )}
             </div>
-            {editingOffer && (
-              <div className="mt-3 flex gap-2">
-                <input
-                  type="text"
-                  value={offerInput}
-                  onChange={(e) => setOfferInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addOffer()}
-                  placeholder="Add a skill..."
-                  className={addInputCls}
-                />
-                <button
-                  onClick={addOffer}
-                  className="flex items-center gap-1 rounded-xl border border-cream-dark px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-ink-muted hover:text-ink"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
