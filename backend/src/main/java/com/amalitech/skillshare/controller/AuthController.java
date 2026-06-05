@@ -22,22 +22,22 @@ public class AuthController {
         return userRepository.save(user);
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody User user) {
+@PostMapping("/login")
+public Map<String, Object> login(@RequestBody LoginRequest request) {
 
-        Optional<User> existingUser =
-                userRepository.findByEmail(user.getEmail());
+    User user = userRepository.findByEmail(request.getEmail());
 
-        if (existingUser.isPresent()) {
-
-            User foundUser = existingUser.get();
-
-            if (foundUser.getPassword()
-                    .equals(user.getPassword())) {
-                return "Login Successful";
-            }
-        }
-
-        return "Invalid Email or Password";
+    if (user == null || !user.getPassword().equals(request.getPassword())) {
+        return Map.of(
+                "message", "Invalid credentials"
+        );
     }
+
+    return Map.of(
+            "message", "Login Successful",
+            "username", user.getUsername(),
+            "email", user.getEmail(),
+            "location", user.getLocation()
+    );
+  }
 }
