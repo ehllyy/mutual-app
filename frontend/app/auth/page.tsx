@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftRight, Eye, EyeOff, ArrowRight } from "lucide-react";
-import { login, getUser } from "@/lib/auth";
+import { login } from "@/lib/auth";
 import { registerUser, loginUser } from "@/lib/api";
 
 /* ─── constants ─────────────────────────────────────────────────── */
@@ -171,13 +171,8 @@ function AuthContent() {
     setLoading(true);
     setApiError("");
     try {
-      await loginUser(siEmail.trim(), siPassword);
-      const existingUser = getUser();
-      if (!existingUser || !existingUser.name) {
-        login(siEmail.trim(), siEmail.trim());
-      } else {
-        login(existingUser.name, siEmail.trim());
-      }
+      const data = await loginUser(siEmail.trim(), siPassword);
+      login(data.username, data.email);
       window.dispatchEvent(new Event("mutual-auth-change"));
       setTimeout(() => router.push("/browse"), 150);
     } catch {

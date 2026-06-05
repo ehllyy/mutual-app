@@ -21,7 +21,7 @@ https://mutual-app-seven.vercel.app
 ### Backend
 - Spring Boot (Java)
 - MySQL
-- Deployed on Railway
+- Deployed on Railway: https://mutual-app-production.up.railway.app
 
 ## Pages
 | Route | Page | Description |
