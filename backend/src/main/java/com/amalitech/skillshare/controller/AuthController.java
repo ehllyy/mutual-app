@@ -22,5 +22,19 @@ public class AuthController {
         return userRepository.save(user);
     }
 
-    
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String password = request.get("password");
+        User user = userRepository.findByEmail(email);
+        if (user == null || !user.getPassword().equals(password)) {
+            return Map.of("message", "Invalid credentials");
+        }
+        return Map.of(
+            "message", "Login Successful",
+            "username", user.getUsername(),
+            "email", user.getEmail(),
+            "location", user.getLocation() != null ? user.getLocation() : ""
+        );
+    }
 }
