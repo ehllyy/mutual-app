@@ -25,15 +25,14 @@ public class AuthController {
     public Map<String, Object> login(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user == null || !user.getPassword().equals(password)) {
             return Map.of("message", "Invalid credentials");
         }
         return Map.of(
             "message", "Login Successful",
             "username", user.getUsername(),
-            "email", user.getEmail(),
-            "location", user.getLocation()
+            "email", user.getEmail()
         );
     }
 }
