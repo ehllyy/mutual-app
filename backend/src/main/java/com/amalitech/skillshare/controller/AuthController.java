@@ -31,6 +31,7 @@ public class AuthController {
         }
         return Map.of(
             "message", "Login Successful",
+            "id", user.getId(),
             "username", user.getUsername(),
             "email", user.getEmail()
         );
