@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MapPin, ArrowLeftRight, X, Send, ChevronLeft } from "lucide-react";
-import { isLoggedIn } from "@/lib/auth";
+import { isLoggedIn, getUser } from "@/lib/auth";
 import AuthPromptModal from "@/components/AuthPromptModal";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -59,6 +59,10 @@ export default function UserProfilePage() {
   const [proposalSkill, setProposalSkill] = useState("");
   const [proposalMessage, setProposalMessage] = useState("");
   const [proposalSent, setProposalSent] = useState(false);
+  const [msgModalOpen, setMsgModalOpen] = useState(false);
+  const [msgText, setMsgText] = useState("");
+  const [msgSent, setMsgSent] = useState(false);
+  const [msgSending, setMsgSending] = useState(false);
 
   useEffect(() => {
     setLoggedIn(isLoggedIn());
@@ -94,6 +98,36 @@ export default function UserProfilePage() {
   function handleSend() {
     if (!proposalSkill || !proposalMessage.trim()) return;
     setProposalSent(true);
+  }
+
+  function openMsgModal() {
+    if (!loggedIn) { setAuthPrompt(true); return; }
+    setMsgModalOpen(true);
+    setMsgSent(false);
+    setMsgText("");
+  }
+
+  async function sendMsg() {
+    const text = msgText.trim();
+    if (!text) return;
+    setMsgSending(true);
+    const user = getUser();
+    try {
+      await fetch(`${BASE_URL}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: user?.name,
+          receiver: decodedUsername,
+          content: text,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+      setMsgSent(true);
+      setTimeout(() => setMsgModalOpen(false), 1500);
+    } catch { /* keep modal open */ } finally {
+      setMsgSending(false);
+    }
   }
 
   return (
@@ -132,13 +166,20 @@ export default function UserProfilePage() {
                 </div>
               )}
             </div>
-            <div className="mt-5">
+            <div className="mt-5 flex gap-2">
               <button
                 onClick={openModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft"
               >
                 <ArrowLeftRight className="h-4 w-4" />
                 Propose a swap
+              </button>
+              <button
+                onClick={openMsgModal}
+                className="flex items-center justify-center gap-2 rounded-xl border border-cream-dark bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink-muted"
+              >
+                <Send className="h-4 w-4" />
+                Message
               </button>
             </div>
           </div>
@@ -200,6 +241,62 @@ export default function UserProfilePage() {
           title="Join Mutual to propose a swap"
           onClose={() => setAuthPrompt(false)}
         />
+      )}
+
+      {/* ── SEND MESSAGE MODAL ─────────────────────────────── */}
+      {msgModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
+          onClick={() => setMsgModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-cream p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {msgSent ? (
+              <div className="py-4 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-sage-light">
+                  <Send className="h-5 w-5 text-sage" />
+                </div>
+                <h3 className="text-lg font-bold text-ink">Message sent!</h3>
+                <p className="mt-1.5 text-sm text-ink-muted">
+                  {decodedUsername} will receive your message.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-5 flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-ink">Send a message</h3>
+                    <p className="mt-0.5 text-sm text-ink-muted">to {decodedUsername}</p>
+                  </div>
+                  <button
+                    onClick={() => setMsgModalOpen(false)}
+                    className="rounded-full p-1.5 text-ink-muted transition-colors hover:bg-cream-dark"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <textarea
+                  value={msgText}
+                  onChange={(e) => setMsgText(e.target.value)}
+                  rows={4}
+                  autoFocus
+                  placeholder={`Hi ${decodedUsername.split(" ")[0]}, I'd love to connect…`}
+                  className="w-full resize-none rounded-xl border border-cream-dark bg-white px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-sage/30"
+                />
+                <button
+                  onClick={sendMsg}
+                  disabled={!msgText.trim() || msgSending}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-2.5 text-sm font-semibold text-cream transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Send className="h-4 w-4" />
+                  {msgSending ? "Sending…" : "Send message"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── PROPOSE A SWAP MODAL ───────────────────────────── */}

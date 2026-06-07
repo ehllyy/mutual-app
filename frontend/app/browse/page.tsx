@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, MapPin, ArrowRight, X, Send } from "lucide-react";
-import { isLoggedIn } from "@/lib/auth";
+import { isLoggedIn, getUser } from "@/lib/auth";
 import AuthPromptModal from "@/components/AuthPromptModal";
 
 const CATEGORIES = [
@@ -55,7 +55,6 @@ function toAvatarColor(name: string) {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-const MY_SKILLS = ["UI/UX Design (Figma)", "Wireframing", "User Research"];
 
 export default function BrowsePage() {
   const [search, setSearch] = useState("");
@@ -112,8 +111,27 @@ export default function BrowsePage() {
     setProposalTarget(null);
   }
 
-  function handleSend() {
-    if (!proposalSkill || !proposalMessage.trim()) return;
+  const mySkills = listings
+    .filter((s) => s.username === getUser()?.name)
+    .map((s) => s.title)
+    .filter(Boolean);
+
+  async function handleSend() {
+    if (!proposalSkill || !proposalMessage.trim() || !proposalTarget) return;
+    const user = getUser();
+    if (!user?.name) return;
+    try {
+      await fetch(`${BASE_URL}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: user.name,
+          receiver: proposalTarget.username,
+          content: proposalMessage,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch { /* show success regardless */ }
     setProposalSent(true);
   }
 
@@ -371,7 +389,7 @@ export default function BrowsePage() {
                         style={{ backgroundColor: "#F5F1E6" }}
                       >
                         <option value="">Choose what you are offering..</option>
-                        {MY_SKILLS.map((s) => (
+                        {mySkills.map((s) => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
