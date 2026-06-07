@@ -25,7 +25,18 @@ public class MessageController {
     ) {
         return messageRepository.save(message);
     }
-
+    
+@GetMapping("/between/{user1}/{user2}")
+public List<Message> getConversation(
+        @PathVariable String user1,
+        @PathVariable String user2
+) 
+    {
+    return messageRepository.findBySenderAndReceiverOrSenderAndReceiver(
+        user1, user2, user2, user1
+    );
+}
+    
     @GetMapping("/{receiver}")
     public List<Message> getMessages(
             @PathVariable String receiver
