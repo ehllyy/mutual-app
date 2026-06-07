@@ -100,6 +100,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [editingBio, setEditingBio] = useState(false);
   const [bioDraft, setBioDraft] = useState("");
+  const [bioSaved, setBioSaved] = useState(false);
 
   /* skills from API */
   const [offer, setOffer] = useState<string[]>([]);
@@ -112,13 +113,20 @@ export default function ProfilePage() {
     const savedNeighbourhood =
       user?.neighbourhood ||
       (typeof window !== "undefined" ? localStorage.getItem("mutual_neighbourhood") ?? "" : "");
-    const savedBio =
-      typeof window !== "undefined" ? localStorage.getItem("mutual_about") ?? "" : "";
 
     setName(savedName);
     setNeighbourhood(savedNeighbourhood);
-    setBio(savedBio);
-    setBioDraft(savedBio);
+
+    if (user?.id) {
+      fetch(`${BASE_URL}/users/${user.id}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          const about = data?.about ?? "";
+          setBio(about);
+          setBioDraft(about);
+        })
+        .catch(() => {});
+    }
 
     if (savedName) {
       fetch(`${BASE_URL}/skills`)
@@ -136,11 +144,23 @@ export default function ProfilePage() {
 
   /* ─ about handlers ─ */
   function startBioEdit() { setBioDraft(bio); setEditingBio(true); }
-  function saveBio() {
+  async function saveBio() {
     const updated = bioDraft.trim() || bio;
     setBio(updated);
-    localStorage.setItem("mutual_about", updated);
     setEditingBio(false);
+    const user = getUser();
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`${BASE_URL}/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ about: updated }),
+      });
+      if (res.ok) {
+        setBioSaved(true);
+        setTimeout(() => setBioSaved(false), 2000);
+      }
+    } catch { /* silent — bio already updated in UI */ }
   }
   function cancelBio() { setEditingBio(false); }
 
@@ -186,6 +206,9 @@ export default function ProfilePage() {
             onSave={saveBio}
             onCancel={cancelBio}
           />
+          {bioSaved && (
+            <p className="mb-2 text-xs font-medium text-sage">Saved ✓</p>
+          )}
           {editingBio ? (
             <textarea
               value={bioDraft}

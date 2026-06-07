@@ -51,6 +51,7 @@ export default function UserProfilePage() {
   const router = useRouter();
 
   const [skills, setSkills] = useState<ApiSkill[]>([]);
+  const [about, setAbout] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [authPrompt, setAuthPrompt] = useState(false);
@@ -61,6 +62,12 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     setLoggedIn(isLoggedIn());
+
+    fetch(`${BASE_URL}/users/username/${encodeURIComponent(decodedUsername)}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (data) setAbout(data.about ?? ""); })
+      .catch(() => {});
+
     fetch(`${BASE_URL}/skills`)
       .then((res) => res.json())
       .then((data: ApiSkill[]) => {
@@ -140,7 +147,9 @@ export default function UserProfilePage() {
         {/* ── ABOUT ──────────────────────────────────────────── */}
         <div className="rounded-2xl border border-cream-dark bg-white p-6 shadow-sm">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">About</p>
-          <p className="text-sm leading-relaxed text-ink-soft">No about yet.</p>
+          <p className="text-sm leading-relaxed text-ink-soft">
+            {about || "No about yet."}
+          </p>
         </div>
 
         {/* ── SKILLS GRID ────────────────────────────────────── */}

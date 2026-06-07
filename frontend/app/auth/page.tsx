@@ -154,8 +154,8 @@ function AuthContent() {
     setApiError("");
     try {
       const username = `${firstName.trim()} ${lastName.trim()}`;
-      await registerUser(username, email.trim(), password);
-      login(`${firstName.trim()} ${lastName.trim()}`, email.trim());
+      const data = await registerUser(username, email.trim(), password);
+      login(username, email.trim(), neighbourhood.trim(), data.id ?? 0);
       localStorage.setItem("mutual_neighbourhood", neighbourhood.trim());
       router.push("/browse");
     } catch {
@@ -172,7 +172,7 @@ function AuthContent() {
     setApiError("");
     try {
       const data = await loginUser(siEmail.trim(), siPassword);
-      login(data.username, data.email);
+      login(data.username, data.email, "", data.id ?? 0);
       window.dispatchEvent(new Event("mutual-auth-change"));
       setTimeout(() => router.push("/browse"), 150);
     } catch {
