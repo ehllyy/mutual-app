@@ -25,6 +25,22 @@ type Contact = {
   unread: number;
 };
 
+/* ─── localStorage for sent contacts ────────────────────────────── */
+
+const SENT_KEY = "mutual_sent_contacts";
+
+function getSentContacts(): string[] {
+  try { return JSON.parse(localStorage.getItem(SENT_KEY) ?? "[]"); }
+  catch { return []; }
+}
+
+function saveSentContact(name: string): void {
+  const existing = getSentContacts();
+  if (!existing.includes(name)) {
+    localStorage.setItem(SENT_KEY, JSON.stringify([...existing, name]));
+  }
+}
+
 /* ─── helpers ─────────────────────────────────────────────────────── */
 
 const AVATAR_COLORS = [
@@ -79,10 +95,11 @@ export default function MessagesPage() {
   const [showChat, setShowChat] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  /* ─ load contacts (all messages for current user, grouped by other person) ─ */
+  /* ─ load contacts ─ */
   const loadContacts = useCallback(async () => {
     if (!user?.name) return;
     try {
+      // Received messages — grouped by the other party
       const res = await fetch(`${BASE_URL}/messages/${encodeURIComponent(user.name)}`);
       if (!res.ok) return;
       const data: ApiMessage[] = await res.json();
@@ -103,6 +120,25 @@ export default function MessagesPage() {
           unread: (existing?.unread ?? 0) + (isReceived ? 1 : 0),
         });
       }
+
+      // Sent-only contacts from localStorage — fetch their last message
+      const sentOnly = getSentContacts().filter((name) => !map.has(name));
+      await Promise.all(
+        sentOnly.map(async (contactName) => {
+          try {
+            const r = await fetch(
+              `${BASE_URL}/messages/between/${encodeURIComponent(user.name)}/${encodeURIComponent(contactName)}`
+            );
+            if (!r.ok) return;
+            const thread: ApiMessage[] = await r.json();
+            if (!Array.isArray(thread) || thread.length === 0) return;
+            const last = [...thread].sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )[0];
+            map.set(contactName, { lastMessage: last.content, lastTime: last.timestamp, unread: 0 });
+          } catch { /* skip */ }
+        })
+      );
 
       const list: Contact[] = Array.from(map.entries())
         .map(([name, v]) => ({ name, ...v }))
@@ -141,6 +177,34 @@ export default function MessagesPage() {
     }
   }, [thread]);
 
+  /* ─ poll thread every 5 s when a conversation is open ─ */
+  useEffect(() => {
+    if (!selectedContact || !user?.name) return;
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `${BASE_URL}/messages/between/${encodeURIComponent(user.name)}/${encodeURIComponent(selectedContact)}`
+        );
+        if (!res.ok) return;
+        const data: ApiMessage[] = await res.json();
+        if (!Array.isArray(data)) return;
+        const sorted = [...data].sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        setThread((prev) =>
+          JSON.stringify(prev) === JSON.stringify(sorted) ? prev : sorted
+        );
+      } catch { /* silent */ }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [selectedContact, user?.name]);
+
+  /* ─ poll contacts every 10 s ─ */
+  useEffect(() => {
+    const id = setInterval(() => { loadContacts(); }, 10000);
+    return () => clearInterval(id);
+  }, [loadContacts]);
+
   /* ─ handlers ─ */
   function selectContact(name: string) {
     setSelectedContact(name);
@@ -163,6 +227,7 @@ export default function MessagesPage() {
           timestamp: new Date().toISOString(),
         }),
       });
+      saveSentContact(selectedContact);
       await loadThread(selectedContact);
       const now = new Date().toISOString();
       setContacts((prev) => {
