@@ -172,6 +172,10 @@ function AuthContent() {
     setApiError("");
     try {
       const data = await loginUser(siEmail.trim(), siPassword);
+      if (data.message !== "Login Successful") {
+        setApiError("Invalid email or password.");
+        return;
+      }
       login(data.username, data.email, "", data.id ?? 0);
       window.dispatchEvent(new Event("mutual-auth-change"));
       setTimeout(() => router.push("/browse"), 150);
