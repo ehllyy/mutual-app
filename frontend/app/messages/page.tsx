@@ -41,6 +41,21 @@ function saveSentContact(name: string): void {
   }
 }
 
+/* ─── localStorage for last-read timestamps ──────────────────────── */
+
+const LAST_READ_KEY = "mutual_last_read";
+
+function getLastRead(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(LAST_READ_KEY) ?? "{}"); }
+  catch { return {}; }
+}
+
+function updateLastRead(contactName: string): void {
+  const existing = getLastRead();
+  existing[contactName] = new Date().toISOString();
+  localStorage.setItem(LAST_READ_KEY, JSON.stringify(existing));
+}
+
 /* ─── helpers ─────────────────────────────────────────────────────── */
 
 const AVATAR_COLORS = [
@@ -94,54 +109,69 @@ export default function MessagesPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [showChat, setShowChat] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const selectedContactRef = useRef<string | null>(null);
+
+  useEffect(() => { selectedContactRef.current = selectedContact; }, [selectedContact]);
 
   /* ─ load contacts ─ */
   const loadContacts = useCallback(async () => {
     if (!user?.name) return;
     try {
-      // Received messages — grouped by the other party
+      // Discover contacts from received messages + sent contacts in localStorage
       const res = await fetch(`${BASE_URL}/messages/${encodeURIComponent(user.name)}`);
-      if (!res.ok) return;
-      const data: ApiMessage[] = await res.json();
-      if (!Array.isArray(data)) return;
-
-      const sorted = [...data].sort(
-        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
-      const map = new Map<string, { lastMessage: string; lastTime: string; unread: number }>();
-      for (const msg of sorted) {
-        const other = msg.sender === user.name ? msg.receiver : msg.sender;
-        const existing = map.get(other);
-        const isReceived = msg.receiver === user.name;
-        map.set(other, {
-          lastMessage: msg.content,
-          lastTime: msg.timestamp,
-          unread: (existing?.unread ?? 0) + (isReceived ? 1 : 0),
-        });
+      const receivedData: ApiMessage[] = res.ok ? await res.json() : [];
+      const receivedSet = new Set<string>();
+      if (Array.isArray(receivedData)) {
+        for (const msg of receivedData) {
+          receivedSet.add(msg.sender === user.name ? msg.receiver : msg.sender);
+        }
       }
+      const allContacts = Array.from(new Set([...receivedSet, ...getSentContacts()]));
 
-      // Sent-only contacts from localStorage — fetch their last message
-      const sentOnly = getSentContacts().filter((name) => !map.has(name));
-      await Promise.all(
-        sentOnly.map(async (contactName) => {
+      // Fetch full thread for every contact to get accurate last message + unread
+      const lastRead = getLastRead();
+      const openContact = selectedContactRef.current;
+
+      const results = await Promise.all(
+        allContacts.map(async (contactName): Promise<Contact | null> => {
           try {
             const r = await fetch(
               `${BASE_URL}/messages/between/${encodeURIComponent(user.name)}/${encodeURIComponent(contactName)}`
             );
-            if (!r.ok) return;
-            const thread: ApiMessage[] = await r.json();
-            if (!Array.isArray(thread) || thread.length === 0) return;
-            const last = [...thread].sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            )[0];
-            map.set(contactName, { lastMessage: last.content, lastTime: last.timestamp, unread: 0 });
-          } catch { /* skip */ }
+            if (!r.ok) return null;
+            const msgs: ApiMessage[] = await r.json();
+            if (!Array.isArray(msgs) || msgs.length === 0) return null;
+
+            const sorted = [...msgs].sort(
+              (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+            const last = sorted[sorted.length - 1];
+
+            // BUG 2: count unread only after the last-read timestamp
+            const lastReadTime = lastRead[contactName]
+              ? new Date(lastRead[contactName]).getTime()
+              : 0;
+
+            // BUG 1: if conversation is currently open, force unread = 0
+            const unread = contactName === openContact
+              ? 0
+              : sorted.filter(
+                  (m) => m.receiver === user.name &&
+                          new Date(m.timestamp).getTime() > lastReadTime
+                ).length;
+
+            // BUG 3: prefix "You: " if the last message was sent by us
+            const preview = last.sender === user.name
+              ? `You: ${last.content}`
+              : last.content;
+
+            return { name: contactName, lastMessage: preview, lastTime: last.timestamp, unread };
+          } catch { return null; }
         })
       );
 
-      const list: Contact[] = Array.from(map.entries())
-        .map(([name, v]) => ({ name, ...v }))
+      const list = results
+        .filter((c): c is Contact => c !== null)
         .sort((a, b) => new Date(b.lastTime).getTime() - new Date(a.lastTime).getTime());
 
       setContacts(list);
@@ -210,6 +240,7 @@ export default function MessagesPage() {
     setSelectedContact(name);
     setShowChat(true);
     setContacts((prev) => prev.map((c) => (c.name === name ? { ...c, unread: 0 } : c)));
+    updateLastRead(name);
   }
 
   async function sendMessage() {
@@ -230,12 +261,13 @@ export default function MessagesPage() {
       saveSentContact(selectedContact);
       await loadThread(selectedContact);
       const now = new Date().toISOString();
+      const preview = `You: ${text}`;
       setContacts((prev) => {
         const updated = prev.map((c) =>
-          c.name === selectedContact ? { ...c, lastMessage: text, lastTime: now } : c
+          c.name === selectedContact ? { ...c, lastMessage: preview, lastTime: now } : c
         );
         if (!prev.find((c) => c.name === selectedContact)) {
-          updated.unshift({ name: selectedContact, lastMessage: text, lastTime: now, unread: 0 });
+          updated.unshift({ name: selectedContact, lastMessage: preview, lastTime: now, unread: 0 });
         }
         return updated.sort(
           (a, b) => new Date(b.lastTime).getTime() - new Date(a.lastTime).getTime()
