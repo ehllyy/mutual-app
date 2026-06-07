@@ -21,7 +21,10 @@ public class UserController {
     public User getUser(@PathVariable Long id) {
         return userRepository.findById(id).orElse(null);
     }
-
+@GetMapping("/username/{username}")
+public User getUserByUsername(@PathVariable String username) {
+    return userRepository.findByUsername(username).orElse(null);
+}
     @PatchMapping("/{id}")
     public User updateAbout(
             @PathVariable Long id,
