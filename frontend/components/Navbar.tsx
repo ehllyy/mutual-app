@@ -30,6 +30,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false); // mobile hamburger
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authPrompt, setAuthPrompt] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const avatarRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +44,46 @@ export default function Navbar() {
       window.removeEventListener("storage", checkAuth);
     };
   }, []);
+
+  // Clear badge when viewing messages
+  useEffect(() => {
+    if (pathname === "/messages") setUnreadCount(0);
+  }, [pathname]);
+
+  // Poll for unread messages every 10 s
+  useEffect(() => {
+    if (!user?.name) { setUnreadCount(0); return; }
+
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+    type Msg = { id: number; sender: string; receiver: string; timestamp: string };
+
+    async function pollUnread() {
+      try {
+        const res = await fetch(`${BASE_URL}/messages/${encodeURIComponent(user!.name)}`);
+        if (!res.ok) return;
+        const data: Msg[] = await res.json();
+        if (!Array.isArray(data)) return;
+
+        const lastRead: Record<string, string> = (() => {
+          try { return JSON.parse(localStorage.getItem("mutual_last_read") ?? "{}"); }
+          catch { return {}; }
+        })();
+
+        const count = data.filter((m) => {
+          if (m.receiver !== user!.name) return false;
+          const cutoff = lastRead[m.sender] ? new Date(lastRead[m.sender]).getTime() : 0;
+          return new Date(m.timestamp).getTime() > cutoff;
+        }).length;
+
+        if (pathname !== "/messages") setUnreadCount(count);
+      } catch { /* silent */ }
+    }
+
+    pollUnread();
+    const id = setInterval(pollUnread, 10000);
+    return () => clearInterval(id);
+  }, [user?.name, pathname]);
 
   // Close desktop avatar dropdown on outside click
   useEffect(() => {
@@ -96,7 +137,14 @@ export default function Navbar() {
                   pathname.startsWith(href) ? "text-ink" : "text-ink-muted hover:text-ink-soft"
                 }`}
               >
-                {label}
+                <span className="flex items-center gap-1.5">
+                  {label}
+                  {href === "/messages" && unreadCount > 0 && (
+                    <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#3d6b4f] text-[11px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
               </Link>
             ))}
           </nav>
@@ -248,7 +296,14 @@ export default function Navbar() {
                   className="hover:bg-[#F5F1E6] transition-colors block"
                   style={menuItemBase}
                 >
-                  Chats
+                  <span className="flex items-center justify-between">
+                    Chats
+                    {unreadCount > 0 && (
+                      <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#3d6b4f] text-[11px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </span>
                 </Link>
                 <button
                   onClick={() => { logout(); setUser(null); closeMenu(); router.push("/browse"); }}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import MessageToast from "@/components/MessageToast";
 
 const dmSans = DM_Sans({
   variable: "--font-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Navbar />
         <main>{children}</main>
+        <MessageToast />
       </body>
     </html>
   );
