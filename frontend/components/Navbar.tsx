@@ -243,12 +243,15 @@ export default function Navbar() {
             {/* Mobile: hamburger button */}
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex h-8 w-8 flex-col items-center justify-center gap-[7px] md:hidden"
+              className="relative flex h-8 w-8 flex-col items-center justify-center gap-[7px] md:hidden"
               aria-label="Open menu"
             >
               <span className="block h-[2px] w-5 rounded-[1px] bg-[#1C1A14]" />
               <span className="block h-[2px] w-5 rounded-[1px] bg-[#1C1A14]" />
               <span className="block h-[2px] w-5 rounded-[1px] bg-[#1C1A14]" />
+              {unreadCount > 0 && (
+                <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-[#3d6b4f]" />
+              )}
             </button>
           </div>
         </div>

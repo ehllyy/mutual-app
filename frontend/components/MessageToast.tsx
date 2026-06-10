@@ -113,8 +113,9 @@ export default function MessageToast() {
   return (
     <div
       onClick={() => { setToast(null); router.push("/messages"); }}
-      className="fixed bottom-6 right-6 z-[100] flex cursor-pointer items-center gap-3 rounded-[12px] bg-[#1c1a14] px-4 py-3 shadow-lg"
-      style={{ maxWidth: 320 }}
+      className="fixed z-[100] flex cursor-pointer items-center gap-3 rounded-[12px] bg-[#1c1a14] px-4 py-3 shadow-lg
+        top-4 left-1/2 -translate-x-1/2 w-[90vw] max-w-[360px]
+        md:top-auto md:bottom-4 md:left-auto md:right-4 md:translate-x-0 md:w-[320px]"
     >
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
