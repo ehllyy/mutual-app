@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, MapPin, ArrowRight, X, Send } from "lucide-react";
 import { isLoggedIn, getUser } from "@/lib/auth";
 import AuthPromptModal from "@/components/AuthPromptModal";
+import { fetchSkillsWithFallback } from "@/lib/demoData";
 
 const CATEGORIES = [
   "All Skills",
@@ -68,18 +69,8 @@ export default function BrowsePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/skills`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data: ApiSkill[]) => {
-        console.log("API response:", data);
-        setListings(Array.isArray(data) ? data : []);
-      })
-      .catch((error) => {
-        console.log("Fetch error:", error);
-      })
+    fetchSkillsWithFallback()
+      .then((data) => setListings(data))
       .finally(() => setLoading(false));
   }, []);
 

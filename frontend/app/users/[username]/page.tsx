@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { MapPin, ArrowLeftRight, X, Send, ChevronLeft } from "lucide-react";
 import { isLoggedIn, getUser } from "@/lib/auth";
 import AuthPromptModal from "@/components/AuthPromptModal";
+import { fetchSkillsWithFallback, DEMO_ABOUT } from "@/lib/demoData";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -69,11 +70,10 @@ export default function UserProfilePage() {
 
     fetch(`${BASE_URL}/users/username/${encodeURIComponent(decodedUsername)}`)
       .then((res) => res.ok ? res.json() : null)
-      .then((data) => { if (data) setAbout(data.about ?? ""); })
-      .catch(() => {});
+      .then((data) => { setAbout(data ? data.about ?? "" : DEMO_ABOUT[decodedUsername] ?? ""); })
+      .catch(() => setAbout(DEMO_ABOUT[decodedUsername] ?? ""));
 
-    fetch(`${BASE_URL}/skills`)
-      .then((res) => res.json())
+    fetchSkillsWithFallback()
       .then((data: ApiSkill[]) => {
         setSkills(Array.isArray(data) ? data.filter((s) => s.username === decodedUsername) : []);
       })
